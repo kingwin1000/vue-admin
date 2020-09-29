@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import {getMenu} from "@/api/user";
+import { getMenu } from '@/api/user'
 Vue.use(Router)
 
 /* Layout */
@@ -61,13 +61,16 @@ export const constantRoutes = [
   },
   {
     path: '/',
-    hidden: true,
-    redirect: '/index',
+    hidden: false,
+    redirect: '/index/index',
     component: Layout,
     children: [
       {
-        path: 'index',
-        component: () => import('@/views/index/index')
+        path: '/index/index',
+        component: () => import('@/views/index/index'),
+        meta: {
+          title: '个人中心1'
+        }
       },
       {
         path: '/index/user',
@@ -84,97 +87,33 @@ export const constantRoutes = [
  * asyncRoutes
  * the routes that need to be dynamically loaded based on user roles
  */
-function setRoutersType(list,parentName){
-	var asyncRoutesType = [];
-  list.forEach(item => {
-		var _routObj = {};
-		if(item.children.length > 0){
-			if(item.pid == '0'){
-				_routObj.path = '/'+item.name;	
-				_routObj.redirect = _routObj.path+'/'+item.children[0].name;
-				_routObj.component = Layout;
-				_routObj.meta = {
-					title: item.title,
-					icon : item.name,
-					activeMenu: item.active_path,
-					roles: item.roles				
-				}
-				_routObj.hidden = item.type == '2' ? true : false;
-				_routObj.name = item.name+'_'+item.id;
-				_routObj.children = setRoutersType(item.children,item.name);
-				asyncRoutesType.push(_routObj);					
-			}else{
-				_routObj.path = '/'+parentName+'/'+item.name;
-				//console.log(_routObj.path);
-				_routObj.redirect = _routObj.path+'/'+item.children[0].name;
-				_routObj.component = Router;
-				_routObj.meta = {
-					title: item.title,
-					icon : item.name,
-					roles: item.roles,
-					activeMenu: item.active_path
-					//breadcrumb:false			
-				}
-				_routObj.hidden = item.type == '2' ? true : false;
-				_routObj.name = item.name+'_'+item.id;
-				_routObj.children = setRoutersType(item.children,parentName+'/'+item.name);	
-				asyncRoutesType.push(_routObj);								
-			}
-		}else{
-			if(item.pid == '0'){
-				_routObj.path = '/'+item.name;
-				_routObj.redirect = _routObj.path+'/'+item.name;
-				_routObj.component = Layout;
-				_routObj.meta = {
-					icon : item.name,
-					roles: item.roles,
-					breadcrumb:item.type == '1' ? true : false,	
-					activeMenu: item.active_path
-				};
-				_routObj.hidden = item.type == '2' ? true : false;
-				
-				let _componentUrl = item.name+'/'+item.name;
-				_routObj.children = [{
-					path:item.name, 
-					name:item.name+'_'+item.id,
-					component : () => import(`@/views/${_componentUrl}`),
-					meta :{
-						 title: item.title,
-						 roles: item.roles,
-						 breadcrumb:item.type == '1' ? true : false,
-						 activeMenu: item.active_path		
-					}
-				}]
-				asyncRoutesType.push(_routObj);			
-			}else{
-				_routObj.path = item.name;
-				var _componentUrl = parentName+'/'+item.name;
-				 _componentUrl = _componentUrl.replace(/^\/*/g, '');
-        //_routObj.component = () => import(`@/views/${_componentUrl}`);
-        _routObj.component = (resolve) => require([`@/views/${_componentUrl}`], resolve)
-				_routObj.meta = {
-					title: item.title,
-					roles:item.roles,
-					breadcrumb:item.type == '1' ? true : false,	
-					activeMenu: item.active_path			
-				};
-				_routObj.hidden = item.type == '2' ? true : false;
-				_routObj.name = item.name+'_'+item.id;
-				asyncRoutesType.push(_routObj);			
-			}
-		}	
-	})
-	return asyncRoutesType;
+/**
+function setRoutersType(list){
+
+  for(let i = 0; i<list.length; i++){
+    var item = list[i];
+    if(item.component == '/layout'){
+      item.component = Layout;
+    }else{
+      item.component =  require(`@/views${item.component}`).default
+    }
+    if(item.children && item.children.length > 0){
+      setRoutersType(item.children)
+    }
+  }
+  console.log(list)
+  return list;
 }
+**/
 export async function asyncRoutes() {
-  var _menu = await getMenu(); 
-	if(_menu.code = 20000){
-    console.log(setRoutersType(_menu.data))
-		return setRoutersType(_menu.data);
-	}else{
-		return [];
-	}
-}  
+  var _menu = await getMenu()
+  if (_menu.code = 20000) {
+    // var _data = setRoutersType(_menu.data);
+    return []
+  } else {
+    return []
+  }
+}
 
 /**
 export const asyncRoutes = [
