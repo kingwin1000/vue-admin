@@ -173,7 +173,7 @@ export default {
             menuName: this.formData.name,
             menuTitle: this.formData.path,
             hidden: false,
-            idPath: [0]
+            parentId:'0'
           }
 
           var res = await request.post(config.menu, _data)
@@ -193,13 +193,23 @@ export default {
     },
     append(data) {
       this.subCategoryFormVisible = true
+			console.log(data);
       this.subCategoryFormData = { parent_name: data.title, status: '1', parent_id: data.id, type: '1', name: '', path: '' }
     },
     subCategoryFormSubmit() {
       this.$refs['dataForm'].validate(async valid => {
         if (valid) {
           this.formLoading = true
-          var res = await request.post(config.addMenuSave, this.subCategoryFormData)
+					let _data = {
+            menuName: this.subCategoryFormData.name,
+            menuTitle: this.subCategoryFormData.path,
+            hidden: false,
+            parentId: this.subCategoryFormData.parent_id
+          }
+					
+					
+					
+          var res = await request.post(config.menu, _data)
           this.formLoading = false
           if (res.code == '20000') {
             this.hideSubCategoryForm()

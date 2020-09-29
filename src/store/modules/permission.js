@@ -51,6 +51,7 @@ const actions = {
     return new Promise( async resolve => {
       let _asyncRoutes = await asyncRoutes();
       let accessedRoutes = filterAsyncRoutes(_asyncRoutes, roles)
+			console.log(accessedRoutes)
       commit('SET_ROUTES', accessedRoutes)
       resolve(accessedRoutes)
     })

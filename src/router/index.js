@@ -87,29 +87,84 @@ export const constantRoutes = [
  * asyncRoutes
  * the routes that need to be dynamically loaded based on user roles
  */
-/**
-function setRoutersType(list){
 
-  for(let i = 0; i<list.length; i++){
-    var item = list[i];
-    if(item.component == '/layout'){
-      item.component = Layout;
-    }else{
-      item.component =  require(`@/views${item.component}`).default
-    }
-    if(item.children && item.children.length > 0){
-      setRoutersType(item.children)
-    }
-  }
-  console.log(list)
-  return list;
+function setRoutersType(list,parentName){
+	console.log('list',list)
+	var asyncRoutesType = [];
+	list.forEach(item => {
+		var _routObj = {};
+		if(item.children && item.children.length > 0){
+			if(item.parentId == '0'){
+				_routObj.path = '/'+item.menuTitle;	
+				_routObj.redirect = _routObj.path+'/'+item.children[0].menuTitle;
+				_routObj.component = Layout;
+				_routObj.meta = {
+					title: item.menuName,
+					icon : item.menuTitle,
+					breadcrumb:true,
+					roles:['324'],		
+				}
+				_routObj.hidden = item.hidden;
+				_routObj.name = item.id; 
+				_routObj.children = setRoutersType(item.children,item.menuTitle);				
+				asyncRoutesType.push(_routObj);	
+			}else{
+
+
+
+			}
+		}else{
+			if(item.parentId == '0'){
+				_routObj.path = '/'+item.menuTitle;
+				_routObj.redirect = _routObj.path+'/'+item.menuTitle;
+				_routObj.component = Layout;
+				_routObj.meta = {
+					icon : item.menuTitle,
+					roles: item.roles,
+					//breadcrumb:item.type == '1' ? true : false,	
+					//activeMenu: item.active_path
+				};
+				_routObj.hidden = item.hidden;
+				
+				let _componentUrl = item.menuTitle+'/'+item.menuTitle;
+				_routObj.children = [{
+					path:item.menuTitle, 
+					name:item.id,
+					component : () => import(`@/views/${_componentUrl}`),	
+					meta :{
+						 title: item.menuName,
+						 roles: ['324'],
+						 breadcrumb:item.type == '1' ? true : false,
+						 //activeMenu: item.active_path		
+					}
+				}]
+				asyncRoutesType.push(_routObj);					
+			}else{
+
+				_routObj.path = item.menuTitle;
+				var _componentUrl = parentName+'/'+item.menuTitle;
+				_routObj.component =  require(`@/views/${_componentUrl}`).default;
+				_routObj.meta = {
+					title: item.menuName,
+					roles:['324'],
+					breadcrumb:false,	
+					activeMenu: parentName+'/'
+				};
+				_routObj.hidden = item.hidden;
+				asyncRoutesType.push(_routObj);
+			}
+		}
+	})
+	
+	return asyncRoutesType;	
 }
-**/
+
+
 export async function asyncRoutes() {
   var _menu = await getMenu()
   if (_menu.code = 20000) {
-    // var _data = setRoutersType(_menu.data);
-    return []
+   var _data = setRoutersType(_menu.data);
+    return _data;
   } else {
     return []
   }
