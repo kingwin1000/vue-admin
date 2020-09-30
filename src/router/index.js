@@ -64,23 +64,123 @@ export const constantRoutes = [
     hidden: false,
     redirect: '/index/index',
     component: Layout,
+    meta: {
+      title: '系统管理',
+      icon:'system'
+    },    
     children: [
       {
         path: '/index/index',
         component: () => import('@/views/index/index'),
         meta: {
-          title: '个人中心1'
-        }
+          title: '首页',
+          breadcrumb:false,
+        },
+        hidden:true,
       },
+      {
+        path: '/index/setting',
+        component: () => import('@/views/index/user'),
+        meta: {
+          title: '网站设置'
+        }
+      },      
       {
         path: '/index/user',
         component: () => import('@/views/index/user'),
         meta: {
-          title: '个人中心'
+          title: '频道管理'
         }
       }
     ]
-  }
+  },
+  {
+    path: '/system',
+    hidden: false,
+    redirect: '/system/role',
+    component: Layout,
+    meta: {
+      title: '系统设置',
+      icon:'system'
+    },    
+    children: [
+      {
+        path: '/system/role',
+        component: () => import('@/views/system/role'),
+        meta: {
+          title: '角色管理'
+        }
+      },
+      {
+        path: '/system/admin',
+        component: () => import('@/views/system/admin'),
+        meta: {
+          title: '账号管理'
+        }
+      },
+      {
+        path: '/system/menu',
+        component: () => import('@/views/system/menu'),
+        meta: {
+          title: '菜单管理'
+        }
+      },      
+    ]
+  },
+  {
+    path: '/ad',
+    hidden: false,
+    redirect: '/ad/index',
+    component: Layout,
+    meta: {
+      title: '资源管理',
+      icon:'system'
+    },    
+    children: [
+      {
+        path: '/ad/index',
+        component: () => import('@/views/ad/index'),
+        meta: {
+          title: '资源列表'
+        }
+      }  
+    ]
+  },
+
+  {
+    path: '/news',
+    hidden: false,
+    redirect: '/news/index',
+    component: Layout,
+    meta: {
+      title: '资讯管理',
+      icon:'system'
+    },    
+    children: [
+      {
+        path: '/news/index',
+        component: () => import('@/views/system/role'),
+        meta: {
+          title: '资讯列表'
+        }
+      },
+      {
+        path: '/news/list',
+        component: () => import('@/views/system/admin'),
+        meta: {
+          title: '资讯分类树'
+        }
+      },
+      {
+        path: '/news/tags',
+        component: () => import('@/views/system/menu'),
+        meta: {
+          title: '资讯标签'
+        }
+      },      
+    ]
+  },  
+  
 ]
 
 /**
@@ -91,8 +191,11 @@ export const constantRoutes = [
 function setRoutersType(list,parentName){
 	console.log('list',list)
 	var asyncRoutesType = [];
-	list.forEach(item => {
-		var _routObj = {};
+  /**
+     *
+  list.forEach(item => {
+
+   		var _routObj = {};
 		if(item.children && item.children.length > 0){
 			if(item.parentId == '0'){
 				_routObj.path = '/'+item.menuTitle;	
@@ -155,7 +258,8 @@ function setRoutersType(list,parentName){
 			}
 		}
 	})
-	
+	** */
+
 	return asyncRoutesType;	
 }
 
