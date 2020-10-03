@@ -148,7 +148,7 @@ export default {
     }
   },
   mounted(){
-    //this.authFormData = {id:"",auth_rules:[]}
+    this.authFormData = {}
     this.getList();
   },
   methods: {
@@ -210,7 +210,6 @@ export default {
 						}
           }else{
             //新增
-						console.log(this.formData);
             var res = await request.post(config.adminRoles,this.formData);
             if(res.code == '20000'){
               this.formLoading = false;
@@ -235,11 +234,12 @@ export default {
     },    		
 		async handleAuth(row){
       this.authFormVisible = true;
+			this.authFormData = row;
       var res = await request.get(config.menu);
       if(res.code == '20000'){
         this.treeLoad = false;
         this.authList = res.data;
-        this.authDefaultCheckedKeys = row.roleKeys;
+        this.authDefaultCheckedKeys = row.roleMenuIds;
       }
 		},
 		handleDel(index, row){
@@ -267,22 +267,22 @@ export default {
     async authFormSubmit(){
       this.authLoading = true;
       var checkedKeys = this.$refs.tree.getCheckedKeys();
-      
-
-			if (this.authFormData && this.authFormData.auth_rules.length == 0) {
+			
+			if (checkedKeys && checkedKeys.length == 0) {
           this.$alert("请至少选择一个权限", "提示", {
               confirmButtonText: "确定"
           });
           this.authLoading = false;
           return false;
       }
-      var res = await request.put(config.adminRoles,this.authFormData); 
-      this.authLoading = false;
+			var _data = {roleMenuIds:checkedKeys}
+			var res = await request.put(config.adminRoles+'/'+this.authFormData.id,_data);
+			this.authLoading = false;
       this.authFormVisible = false;             
       if(res.code == '20000'){
-        this.$message.success("授权成功");   
+        this.$message.success("授权成功");
+				this.getList();   
       }
-
     },
     hideAutoForm(){
       this.authFormVisible = !this.authFormVisible;

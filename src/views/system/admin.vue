@@ -29,7 +29,7 @@
       <el-form-item class="query-form-item">
         <el-select v-model="listQuery.role_id" placeholder="请选择角色">
           <el-option label="全部" value="" />
-          <el-option v-for="item in rolesList" :key="item.id" :label="item.name" :value="item.id"></el-option>
+          <el-option v-for="item in rolesList" :key="item.id" :label="item.roleName" :value="item.id"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -44,43 +44,34 @@
       <el-table-column label="用户名" prop="username"/>
       <el-table-column label="状态">
         <template slot-scope="scope">
-        	<el-tag v-if="scope.row.username == 'admin'" type="danger">系统</el-tag>
-          <el-tag v-else :type="scope.row.status | statusFilterType">{{ scope.row.status | statusFilterName }}</el-tag>
+          <el-tag :type="scope.row.status | statusFilterType">{{ scope.row.status | statusFilterName }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="角色" prop="roles">
         <template slot-scope="scope">
-        	<template v-if="scope.row.username == 'admin'" type="danger">超级管理员</template>
-          <template v-else >{{ scope.row.roles | rolesFilter( rolesList )  }}</template>
+          <template>{{ scope.row.roles | rolesFilter( rolesList )  }}</template>
         </template>
       </el-table-column>
       <el-table-column label="登录时间" width="200px" :show-overflow-tooltip="true">
         <template slot-scope="scope">
           <template v-if="scope.row.last_login_time !== 0">
-            <i class="el-icon-time" /><span>{{ scope.row.last_login_time | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+            <i class="el-icon-time" /><span>{{ scope.row.loginTime | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
           </template>
           <template v-else>---</template>
         </template>
       </el-table-column>
       <el-table-column label="登录IP">
         <template slot-scope="scope">
-          <span>{{ scope.row.last_login_ip ? scope.row.last_login_ip : '---'}}</span>
+          <span>{{ scope.row.loginIp ? scope.row.loginIp : '---'}}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" fixed="right">
         <template slot-scope="scope">
-        	<template v-if="scope.row.username == 'admin'">
-          	<el-button type="text" disabled>编辑</el-button>
-          	<el-button type="text" disabled>删除</el-button>
-        	</template>
-        	<template v-else>
-          	<el-button type="text" @click="handleForm(scope.$index, scope.row)">编辑</el-button>
-          	<el-button type="text" @click.native.prevent="handleDel(scope.$index, scope.row)">删除</el-button>
-        	</template>          
+          <el-button type="text" @click="handleForm(scope.$index, scope.row)">编辑</el-button>
+          <el-button type="text" @click.native.prevent="handleDel(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-		<pagination v-show="total > listQuery.page_size" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.page_size" @pagination="getList" />
 
     <!--表单-->
     <el-dialog :title="formName" :visible.sync="formVisible" :before-close="hideForm"  :close-on-click-modal="false" width="50%" top="5vh">
@@ -102,7 +93,7 @@
         </el-form-item>
         <el-form-item label="角色" label-width="80px">
           <el-checkbox-group v-model="formAddData.role_ids">
-            <el-checkbox :disabled="item.status == '0'" v-for="item in rolesList" :key="item.id" :label="item.id">{{ item.name }}</el-checkbox>
+            <el-checkbox :disabled="item.status == '0'" v-for="item in rolesList" :key="item.id" :label="item.id">{{ item.roleName }}</el-checkbox>
           </el-checkbox-group>
         </el-form-item>
       </el-form>
@@ -125,7 +116,7 @@
         </el-form-item>
         <el-form-item label="角色" prop="roles" label-width="80px">
           <el-checkbox-group v-model="formEditData.role_ids">
-            <el-checkbox :disabled="item.status == '0'" v-for="item in rolesList" :key="item.id" :label="item.id">{{ item.name }}</el-checkbox>
+            <el-checkbox :disabled="item.status == '0'" v-for="item in rolesList" :key="item.id" :label="item.id">{{ item.roleName }}</el-checkbox>
           </el-checkbox-group>
         </el-form-item>
       </el-form>
@@ -140,7 +131,6 @@
 <script>
 import config from '@/api/bgapi'
 import request from '@/utils/request'
-import Pagination from '@/components/Pagination'
 import { parseTime } from '@/utils'
 import { validUsername,validUsernameOrEmpty } from '@/utils/validate'
 const formJson = {
@@ -151,22 +141,13 @@ const formJson = {
 	role_ids: []
 } 
 export default {
-  components: { Pagination },
   filters: {
     statusFilterType(status) {
-      const statusMap = {
-        0: 'gray',
-        1: 'success',
-        2: 'danger'
-      }
+      const statusMap = {0: 'danger', 1: 'success'}
       return statusMap[status]
     },
     statusFilterName(status) {
-      const statusMap = {
-        0: '禁用',
-        1: '正常',
-        2: '未验证'
-      }
+      const statusMap = {0: '禁用', 1: '正常'}
       return statusMap[status]
     },
     rolesFilter(roleArr,rolesList){
@@ -174,7 +155,7 @@ export default {
 				var roleStr = '';
 				roleArr.forEach(item => {
 					let _role = rolesList.find(role=>role.id == item);
-					roleStr += _role.name+'/';
+					roleStr += _role.roleName+'/';
 				});
 				return roleStr.substr(0,roleStr.length-1);
 			}else{
@@ -218,10 +199,8 @@ export default {
       loading: false,
       rolesList : [],
       listQuery: {
-        page: 1,
-        page_size: 20,
         name: '',
-        //status: '',
+        status: '',
         //role_id: ''
       },
       total: 0,
@@ -264,22 +243,20 @@ export default {
   	}
   },
   mounted() { 
-   // this.getRolesList();
-   // this.getList();
+    this.getRolesList();
+    this.getList();
   },
   methods: {
     async getRolesList(){
-      var res = await request.get(config.listUrl,{params:{'page':'1','page_size':'50'}});
-      var _list = res.data && res.data.list;
-      _list.splice(_list.findIndex(item => item.name === '超级管理员'), 1)
+      var res = await request.get(config.adminRoles);
+      var _list = res.data;
       this.rolesList = _list || [];
     },
     async getList() {
       this.loading = true;
-      var res = await request.get(config.adminIndexUrl,{params:this.listQuery});
+      var res = await request.get(config.adminList,{params:this.listQuery});
       this.loading = false;
-      this.list = res.data.list || [];
-      this.total = res.data.total || 0;
+      this.list = res.data || [];
     },
     async querySearch(queryString, cb) {
       var res = await request.get(config.adminIndexUrl,{params:this.listQuery});
@@ -327,7 +304,14 @@ export default {
             var _role_ids = this.formEditData.role_ids;
             this.formEditData.role_ids = this.formEditData.role_ids.length > 0 ? this.formEditData.role_ids.join(','):'';
             //delete this.formEditData.check_password;
-            var res = await request.post(config.editAdminUrl,this.formEditData);
+						var _id = this.formEditData.id;
+						var _data = {
+							password : this.formEditData.password,
+							status : this.formEditData.status,
+							roles : this.formEditData.role_ids								
+						}; 
+						var res = await request.put(config.menu+'/'+_id,_data);
+            //var res = await request.post(config.editAdminUrl,this.formEditData);
             this.formLoading = false;
             this.formVisible = false;    
             if(res.code == '20000'){
@@ -340,28 +324,25 @@ export default {
 			}else{    
 				this.$refs["dataForm"].validate(async valid => {
           if(valid){
-            this.formLoading = true;
+            //this.formLoading = true;
             if (this.formAddData && this.formAddData.role_ids.length == 0) {
               this.$alert("请至少选择一个角色", "提示", {confirmButtonText: "确定"});
               this.formLoading = false;
               return false;
             }
-						var _role_ids = this.formAddData.role_ids;
-            this.formAddData.role_ids = this.formAddData.role_ids.length > 0 ? this.formAddData.role_ids.join(','):'';
-            var res = await request.post(config.addManageUrl,this.formAddData);
+            this.formAddData.roles = this.formAddData.role_ids;
+						var _obj = {
+							username : this.formAddData.username,
+							password : this.formAddData.password,
+							status : this.formAddData.status,
+							roles : this.formAddData.role_ids
+						}
+						var res = await request.post(config.adminList,_obj);
             this.formLoading = false;
             this.formVisible = false; 
             if(res.code == '20000'){
               this.$message.success('管理员添加成功！');
-              var obj = {
-                id:res.data.id,
-                status:this.formAddData.status,
-                username:this.formAddData.username,
-                last_login_time:0,
-                roles:_role_ids,
-                last_login_ip:''
-              };
-              this.list.unshift(obj);  
+              this.getList();
             }					
           }
 			  })			
@@ -392,8 +373,9 @@ export default {
         this.$confirm("确认删除该记录吗?", "提示", {
             type: "warning",
         }).then(async () => {
-            var res = await request.post(config.delAdminUrl,{'id':row.id});
-            if(res.code == '20000'){
+            //var res = await request.post(config.delAdminUrl,{'id':row.id});
+            var res = await request.delete(config.adminList+'/'+row.id);
+						if(res.code == '20000'){
               this.$message.success("删除成功");  
               this.list.splice(index, 1);	
             }else{
