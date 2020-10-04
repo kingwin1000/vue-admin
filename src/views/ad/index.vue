@@ -44,7 +44,7 @@
         </template>
       </el-table-column>
       
-			<el-table-column align="center" label="上传时间" prop="created" width="200"  show-overflow-tooltip>
+			<el-table-column align="center" label="上传时间" prop="created"  show-overflow-tooltip>
         <template slot-scope="scope">
           {{ scope.row.created | parseTime('{y}-{m}-{d} {h}:{i}') }}
         </template>        
@@ -53,15 +53,16 @@
       
       <el-table-column align="center"  label="操作">
       	<el-button-group slot-scope="scope">
-          <el-button v-if="editNum !== scope.$index" type="primary" size="mini" @click.native.prevent="editWare(scope.row,scope.$index)">编辑</el-button>
-          <el-button v-else type="warning" size="mini" @click.native.prevent="editWare(scope.row,scope.$index)">确认</el-button>   
-                    
+        	<el-button  type="primary" size="mini" @click.native.prevent="watchWare(scope.$index, scope.row)">预览</el-button>
+   				<el-button v-show="editNum !== scope.$index" type="primary" size="mini" @click.native.prevent="editWare(scope.row,scope.$index)">编辑</el-button>
+          <el-button v-show="editNum === scope.$index" type="warning" size="mini" @click.native.prevent="editWare(scope.row,scope.$index)">确认</el-button>   
+                     
           <el-button type="danger" size="mini"  @click.native.prevent="handleDel(scope.$index, scope.row)">删除</el-button> 
         </el-button-group>
       </el-table-column>      
          
     </el-table>
-    <pagination v-show="total > listQuery.page_size" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.page_size" @pagination="getList"/>
+    <pagination v-show="total > listQuery.pageSize" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.pageSize" @pagination="getList"/>
 
 
 
@@ -83,7 +84,14 @@
         </el-form-item>
         
         
-  
+        <el-form-item label="文件" prop="file" label-width="100px" class="query-form-item">
+          <SingleUpload 
+          :ext="typeName[upLoadData.type]" 
+          :type="uploadType[upLoadData.type]" 
+          :size="sizeName[upLoadData.type]" 
+          :imageUrl="imageUrl" @on-select="onSelect"></SingleUpload>
+          <div class="el-upload__tip">只能上传{{typeName[upLoadData.type]}}文件，且不超过{{sizeName[upLoadData.type]}}M</div>
+        </el-form-item>   			
         
         
       </el-form>
@@ -99,6 +107,7 @@
       <video v-if="videoType == '4'" ref="videoPlayer" controlsList="nodownload noremoteplayback" disablePictureInPicture οncοntextmenu="return false"  class="video-box" :src="videoUrl" controls></video>
       <video v-if="videoType == '5'" style="height:55px" ref="videoPlayer" controlsList="nodownload noremoteplayback" disablePictureInPicture οncοntextmenu="return false"  class="video-box" :src="videoUrl" controls></video>
     </el-dialog>
+    
   </div>
 </template>
 <script>
@@ -116,17 +125,18 @@ export default {
       list:[],
       total: 0,
       listQuery: {
-        keyword: '',
+        resName: '',
         page: this.$route.query.page?Number(this.$route.query.page):1,
-        page_size: 20
+        pageSize: 10
       },
-      upLoadFormVisible:true,
+      upLoadFormVisible:false,
       formLoading:false,
       imageUrl:'',
       upLoadData:{
         resType:'0',
         resName:'',
-        resUrl:'abc'
+        resUrl:'',
+				resSize:''
       },
       uploadType:['','pdf','image','','video','audio'],
       typeName:['','pdf','jpg/png/gif/jpeg','','mp4','mp3/wma'],
@@ -157,18 +167,20 @@ export default {
     async getList() {
       this.loading = true;
       //this.$router.push({query: {page:this.listQuery.page}});
-      //var res = await request.get(config.resources,{params:this.listQuery});
-			var res = await request.get(config.resources,{})
+      var res = await request.get(config.resources,{params:this.listQuery});
+			//var res = await request.get(config.resources,{})
       this.loading = false;
       this.list = res.data || [];
-      this.total = res.data.total || 0;
-      if(res.data.list.length > 0){
+      this.total = res.totalNum || 0;
+			/***
+      if(res.data.length > 0){
         res.data.list[0].status = this.isNewAdd ? '0' : res.data.list[0].status ;
       }      
       if(this.isNewAdd){
         this.isNewAdd = false;
         this.upDateNewLine(0,this.list[0]);     
       }
+			***/
     },
 		upLoadWare(){
       this.upLoadFormVisible = true;	
@@ -203,9 +215,10 @@ export default {
         this.getList();
       }
     },
-    onSelect(data,img){
-      this.upLoadData.file = data.file_path;
-      this.imageUrl = img;
+    onSelect(data){
+			this.upLoadData.resUrl = data.resUrl;
+			this.upLoadData.resSize = data.resSize;
+			this.imageUrl = data.imgUrl;
     },
     selectUploadType(){
       this.imageUrl = ''; 
@@ -289,7 +302,7 @@ export default {
         })
       }else{
         this.showViewer = true;
-        this.srcList =  row.preview_full_url;
+        this.srcList =  [process.env.VUE_APP_BASE_API+row.resUrl];
       }
     },
     closeVideo(){

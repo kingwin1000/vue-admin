@@ -46,29 +46,34 @@ export default {
     },
     data() {
         return {
-          uploadHttp:process.env.VUE_APP_BASE_UPLOAD_API,
-          actionUrl:process.env.VUE_APP_BASE_API+'/api/web/tool/upload',
+          uploadHttp:process.env.VUE_APP_BASE_API,
+          actionUrl:process.env.VUE_APP_BASE_API+'/api/upload',
           upLoading:false,
           isPicTyep:false,
           loadNumber:0,
 					headerDate:{
-            'SCHOOL-KEY':this.$store.getters.schoolKey,
+            'X-Token':this.$store.getters.token,
 					}
         };
     },
     mounted(){
-			console.log(1111111);
+			this.resSize = 0;
     },    
     methods: {		
       handleAvatarSuccess(res, file) {
         if(res.code == '20000'){
           this.upLoading = false;
           if(this.type == 'image'){
-            var _imageUrl = process.env.VUE_APP_BASE_UPLOAD_API + res.data.file_path;
+            var _imageUrl = process.env.VUE_APP_BASE_API + res.data;
           }else{
             var _imageUrl = this.uploadImg;
           }
-          this.$emit("on-select",res.data,_imageUrl,this.keyNum);  
+					var _data = {
+						imgUrl:_imageUrl,
+						resUrl:res.data,
+						resSize:this.resSize
+					};
+          this.$emit("on-select",_data);  
         }else{
           this.$message.error("网络出现错误，请稍后再试");
         }                              
@@ -91,6 +96,7 @@ export default {
             }
         } 
         const isLtSize = file.size / 1024 / 1024 < this.size;
+				this.resSize = (file.size / 1024 ).toFixed(2) + 'KB';
         if (!isLtSize) {
           this.$message.error('上传文件大小不能超过 '+this.size+'MB!');
           return false;
