@@ -57,7 +57,7 @@ export default {
         };
     },
     mounted(){
-
+			console.log(1111111);
     },    
     methods: {		
       handleAvatarSuccess(res, file) {

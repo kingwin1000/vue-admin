@@ -4,4 +4,6 @@ export default {
 	menuAuth: `${host}/api/menuAuth`,
 	adminRoles: `${host}/api/adminRoles`,
 	adminList: `${host}/api/adminList`,
+	resources:`${host}/api/resources`,
+	delManyRes:`${host}/api/delManyRes`,
 }

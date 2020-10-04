@@ -7,7 +7,7 @@
     <el-form :inline="true" :model="listQuery" class="query-form">
       <el-form-item class="query-form-item">
         <el-autocomplete
-          v-model="listQuery.name"
+          v-model="listQuery.username"
           :fetch-suggestions="querySearch"
           placeholder="请输入用户名"
           :trigger-on-focus="false"
@@ -259,12 +259,12 @@ export default {
       this.list = res.data || [];
     },
     async querySearch(queryString, cb) {
-      var res = await request.get(config.adminIndexUrl,{params:this.listQuery});
-      var restaurants = res.data.list;
+      var res = await request.get(config.adminList,{params:this.listQuery});
+      var restaurants = res.data;
       cb(restaurants);
     },
     handleSelect(item) {
-      this.listQuery.name = item.username;
+      this.listQuery.username = item.username;
       this.getList();
     },     
 		onSubmit(){

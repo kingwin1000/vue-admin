@@ -8,7 +8,7 @@
     </header> 
     <el-form :inline="true" :model="listQuery" class="query-form">
       <el-form-item>
-        <el-input v-model="listQuery.keyword" :clearable = "true" placeholder="课件名称"></el-input>
+        <el-input v-model="listQuery.resName" :clearable = "true" placeholder="课件名称"></el-input>
       </el-form-item>
       <el-form-item>
         <el-button-group>
@@ -18,72 +18,74 @@
       </el-form-item>
     </el-form> 
     <!-- 表单 -->
-    <el-table v-loading="loading" :data="list" border style="width: 100%" @selection-change="handleSelectionChange">
-      <el-table-column align="center" type="selection" width="55"></el-table-column>
-      <el-table-column align="center" label="名称" prop="name" show-overflow-tooltip>
+    
+    <el-table v-loading="loading" :data="list" border  @selection-change="handleSelectionChange">
+      <el-table-column align="center" width="100" type="selection"></el-table-column>
+      <el-table-column align="center" width="200" label="资源名称" prop="resName" show-overflow-tooltip>
         <template slot-scope="scope">
-          <el-input v-if="editNum === scope.$index" v-model="scope.row.name"></el-input>
-          <span v-else>{{scope.row.name}}</span>
+          <el-input v-if="editNum === scope.$index" size="mini"  v-model="scope.row.resName"></el-input>
+          <span v-else>{{scope.row.resName}}</span>
         </template>
+      </el-table-column>      
+  
+      <el-table-column align="center" label="类型" prop="resType"  width="100">
+        <template slot-scope="scope">
+          <template>{{ scope.row.resType | typeFilter }}</template>
+        </template>
+      </el-table-column>     
+      
+  		<el-table-column align="center" label="大小" prop="resSize" width="100"></el-table-column>
+      
 
-      </el-table-column>
-      <el-table-column align="center" label="类型" prop="type"  width="100">
-        <template slot-scope="scope">
-          <template>{{ scope.row.type | typeFilter }}</template>
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="原始路径" prop="origin_url" show-overflow-tooltip></el-table-column>
-      <el-table-column align="center" label="页数" prop="preview_full_url"  width="80">
-        <template slot-scope="scope">
-          {{scope.row.preview_full_url ? scope.row.preview_full_url.length : '0'}}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="大小" prop="size" width="100"></el-table-column>
       <el-table-column align="center" label="状态" prop="status"  width="100" >
         <template slot-scope="scope">
-          <span style="color:red" v-if="scope.row.status == '1'">未转化</span>
-          <span style="color:green" v-else-if="scope.row.status == '2'">已转化</span>
-          <span style="color:#1890FF" v-else>转化中</span>
+          <span style="color:green" v-if="scope.row.status == '0'">正常</span>
+          <span style="color:red" v-else-if="scope.row.status == '1'">禁止</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="上传时间" prop="create_time" show-overflow-tooltip>
+      
+			<el-table-column align="center" label="上传时间" prop="created" width="200"  show-overflow-tooltip>
         <template slot-scope="scope">
-          {{ scope.row.create_time | parseTime('{y}-{m}-{d} {h}:{i}') }}
+          {{ scope.row.created | parseTime('{y}-{m}-{d} {h}:{i}') }}
         </template>        
-      </el-table-column>
-      <el-table-column align="center"  width="250"  label="操作">
+      </el-table-column>   
+      
+      
+      <el-table-column align="center"  label="操作">
       	<el-button-group slot-scope="scope">
-          <el-button  v-if="scope.row.status == '0'" :loading="listLoading" type="primary" size="mini" @click.native.prevent="upDateNewLine(scope.$index, scope.row)">更新</el-button>
-          <el-button  v-if="scope.row.status == '1'" type="primary" size="mini" @click.native.prevent="transWare(scope.$index, scope.row)">转化</el-button>
-          <el-button  v-if="scope.row.status == '2'" type="primary" size="mini" @click.native.prevent="watchWare(scope.$index, scope.row)">预览</el-button>
-
-
-          <el-button v-show="editNum !== scope.$index" type="primary" size="mini" @click.native.prevent="editWare(scope.row,scope.$index)">编辑</el-button>
-          <el-button v-show="editNum === scope.$index" type="warning" size="mini" @click.native.prevent="editWare(scope.row,scope.$index)">确认</el-button>   
+          <el-button v-if="editNum !== scope.$index" type="primary" size="mini" @click.native.prevent="editWare(scope.row,scope.$index)">编辑</el-button>
+          <el-button v-else type="warning" size="mini" @click.native.prevent="editWare(scope.row,scope.$index)">确认</el-button>   
                     
           <el-button type="danger" size="mini"  @click.native.prevent="handleDel(scope.$index, scope.row)">删除</el-button> 
         </el-button-group>
-      </el-table-column>
+      </el-table-column>      
+         
     </el-table>
     <pagination v-show="total > listQuery.page_size" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.page_size" @pagination="getList"/>
 
-    <el-dialog title="上传课件" :visible.sync="upLoadFormVisible" :before-close="hideForm" :close-on-click-modal="false" width="45%" top="5vh">	
+
+
+    <el-dialog title="上传资源" :visible.sync="upLoadFormVisible" :before-close="hideForm" :close-on-click-modal="false" width="45%" top="5vh">	
       <el-form ref="upLoadForm"  :model="upLoadData" :rules="upLoadRules">
-        <el-form-item label="类型"  prop="type" label-width="100px" class="query-form-item">        
-          <el-select v-model="upLoadData.type" @change="selectUploadType" style=" width:250px;">
-            <el-option label="PDF文件" value="1" />
-            <el-option label="图片" value="2" />
-            <el-option label="视频" value="4" />
-            <el-option label="音频" value="5" />
+        
+        <el-form-item label="资源类型"  prop="resType" label-width="100px" class="query-form-item">        
+          <el-select v-model="upLoadData.resType" @change="selectUploadType" style=" width:250px;">
+            <el-option label="图片" value="0" />
+            <el-option label="视频" value="1" />
+            <el-option label="音频" value="2" />
+            <el-option label="文本" value="3" />            
           </el-select>
         </el-form-item>
-        <el-form-item label="课件名称"  prop="file_name" label-width="100px" class="query-form-item">
-          <el-input  v-model="upLoadData.file_name" placeholder="请输入课件名称" style=" width:250px;"></el-input>
+        
+        
+        <el-form-item label="资源名称"  prop="resName" label-width="100px" class="query-form-item">
+          <el-input  v-model="upLoadData.resName" placeholder="请输入课件名称" style=" width:250px;"></el-input>
         </el-form-item>
-        <el-form-item label="文件" prop="file" label-width="100px" class="query-form-item">
-          <SingleUpload :ext="typeName[upLoadData.type]" :type="uploadType[upLoadData.type]" :size="sizeName[upLoadData.type]" :imageUrl="imageUrl" @on-select="onSelect"></SingleUpload>
-          <div class="el-upload__tip">只能上传{{typeName[upLoadData.type]}}文件，且不超过{{sizeName[upLoadData.type]}}M</div>
-        </el-form-item> 
+        
+        
+  
+        
+        
       </el-form>
       <div class="dialog-footer" style="text-align:right">
         <el-button @click.native="hideForm">取消</el-button>
@@ -104,11 +106,10 @@ import Pagination from '@/components/Pagination'
 import request from '@/utils/request'
 import config from '@/api/bgapi'
 import { parseTime } from '@/utils'
-//import SingleUpload from "@/components/Upload/SingleUpload";
+import SingleUpload from "@/components/Upload/SingleUpload";
 import ElImageViewer from 'element-ui/packages/image/src/image-viewer'
 export default {
-  //components: { Pagination,SingleUpload,ElImageViewer}, 
-  components: { Pagination,ElImageViewer},  
+  components: { Pagination,SingleUpload,ElImageViewer},
   data() {
     return {
       loading: false,
@@ -119,20 +120,20 @@ export default {
         page: this.$route.query.page?Number(this.$route.query.page):1,
         page_size: 20
       },
-      upLoadFormVisible:false,
+      upLoadFormVisible:true,
       formLoading:false,
       imageUrl:'',
       upLoadData:{
-        type:'1',
-        file_name:'',
-        file:''
+        resType:'0',
+        resName:'',
+        resUrl:'abc'
       },
       uploadType:['','pdf','image','','video','audio'],
       typeName:['','pdf','jpg/png/gif/jpeg','','mp4','mp3/wma'],
       sizeName:['',100,3,'',20,20],
       upLoadRules:{
-        file_name: [{ required: true, message: "请输入用户名", trigger: "blur"}],
-        file: [{ required: true }]        
+        resName: [{ required: true, message: "请输入用户名", trigger: "blur"}],
+        resUrl: [{ required: true }]        
       },
       listLoading:false,
       showViewer:false,
@@ -147,7 +148,7 @@ export default {
     this.isNewAdd = false;
     this.timeInterval = null;
     this.selectItme = [];
-   // this.getList();
+    this.getList();
   },
   methods: {
     onSubmit() {
@@ -155,10 +156,11 @@ export default {
     },
     async getList() {
       this.loading = true;
-      this.$router.push({query: {page:this.listQuery.page}});
-      var res = await request.get(config.sourceListUrl,{params:this.listQuery});
+      //this.$router.push({query: {page:this.listQuery.page}});
+      //var res = await request.get(config.resources,{params:this.listQuery});
+			var res = await request.get(config.resources,{})
       this.loading = false;
-      this.list = res.data.list || [];
+      this.list = res.data || [];
       this.total = res.data.total || 0;
       if(res.data.list.length > 0){
         res.data.list[0].status = this.isNewAdd ? '0' : res.data.list[0].status ;
@@ -190,7 +192,7 @@ export default {
         this.$message.error('课件上传文件不能为空！');return;
       }
       this.formLoading = true;
-      var res = await request.post(config.addWareUrl,this.upLoadData);
+      var res = await request.post(config.resources,this.upLoadData);
       this.formLoading = false;
       this.upLoadFormVisible = false;
       this.resetForm();
@@ -218,8 +220,7 @@ export default {
       })
       .then(async () => {
           let _ids = this.selectItme.map((item,index) =>{ return item.id});
-          _ids = _ids.join(',');
-          var res = await request.post(config.delWareUrl,{'id':_ids});
+          var res = await request.post(config.delManyRes,{ids:_ids});
           if(res.code == '20000'){
             this.$message.success("删除成功");  
             this.getList();	
@@ -235,7 +236,7 @@ export default {
             type: "warning",
         })
         .then(async () => {
-            var res = await request.post(config.delWareUrl,{'id':row.id});
+            var res = await request.delete(config.resources+'/'+row.id);
             if(res.code == '20000'){
               this.$message.success("删除成功");  
               this.getList();	
@@ -301,8 +302,10 @@ export default {
         this.editNum = index;
       }else{
         this.editNum = '';
-        var res = await request.post(config.editWareUrl,{id:row.id,file_name:this.list[index].name});
-        //if(res.code == '20000'){
+				
+        //var res = await request.put(config.resources,{id:row.id,file_name:this.list[index].name});
+        var res = await request.put(config.resources+'/'+row.id,{resName:this.list[index].resName})
+				//if(res.code == '20000'){
         //  this.$message.success("试卷编辑成功");
         //}
       }
@@ -310,12 +313,7 @@ export default {
   },
   filters: {
     typeFilter(status) {
-      const typeMap = {
-        1: 'PDF',
-        2: '图片',
-        4: '视频',
-        5: '音频'
-      }
+      const typeMap = { 0: '图片', 1: '视频', 2: '音频', 3: '文本' }
       return typeMap[status]
     }
   },  
