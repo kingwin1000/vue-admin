@@ -1,9 +1,11 @@
 <template>
   <div :class="{fullscreen:fullscreen}" class="tinymce-container" :style="{width:containerWidth}">
     <textarea :id="tinymceId" class="tinymce-textarea" />
+    <!--
     <div class="editor-custom-btn-container">
       <editorImage color="#1890ff" class="editor-upload-btn" @successCBK="imageSuccessCBK" />
     </div>
+    -->
   </div>
 </template>
 
@@ -16,9 +18,11 @@ import editorImage from './components/EditorImage'
 import plugins from './plugins'
 import toolbar from './toolbar'
 import load from './dynamicLoadScript'
-
+import request from '@/utils/request';
 // why use this cdn, detail see https://github.com/PanJiaChen/tinymce-all-in-one
 const tinymceCDN = 'https://cdn.jsdelivr.net/npm/tinymce-all-in-one@4.9.3/tinymce.min.js'
+const host = process.env.VUE_APP_BASE_API;
+const uploadUrl = `${host}/api/upload`
 
 export default {
   name: 'Tinymce',
@@ -116,7 +120,7 @@ export default {
       const _this = this
       window.tinymce.init({
         selector: `#${this.tinymceId}`,
-        language: this.languageTypeList['en'],
+        language: this.languageTypeList['zh'],
         height: this.height,
         body_class: 'panel-body ',
         object_resizing: false,
@@ -151,7 +155,7 @@ export default {
         // it will try to keep these URLs intact
         // https://www.tiny.cloud/docs-3x/reference/configuration/Configuration3x@convert_urls/
         // https://stackoverflow.com/questions/5196205/disable-tinymce-absolute-to-relative-url-conversions
-        convert_urls: false
+        //convert_urls: false
         // 整合七牛上传
         // images_dataimg_filter(img) {
         //   setTimeout(() => {
@@ -167,24 +171,20 @@ export default {
         //   }, 0);
         //   return img
         // },
-        // images_upload_handler(blobInfo, success, failure, progress) {
-        //   progress(0);
-        //   const token = _this.$store.getters.token;
-        //   getToken(token).then(response => {
-        //     const url = response.data.qiniu_url;
-        //     const formData = new FormData();
-        //     formData.append('token', response.data.qiniu_token);
-        //     formData.append('key', response.data.qiniu_key);
-        //     formData.append('file', blobInfo.blob(), url);
-        //     upload(formData).then(() => {
-        //       success(url);
-        //       progress(100);
-        //     })
-        //   }).catch(err => {
-        //     failure('出现未知问题，刷新页面，或者联系程序员')
-        //     console.log(err);
-        //   });
-        // },
+        images_upload_handler(blobInfo, success, failure, progress) {
+          progress(0);
+          const formData = new FormData();
+          formData.append('file', blobInfo.blob());
+          request.post(uploadUrl, formData).then((res)=>{
+            if (res.code == 20000) {
+              success(host+res.data)
+              progress(100)
+            }
+          }).catch(err => {
+            failure('出现未知问题，刷新页面')
+            console.log(err)
+          })
+        },				
       })
     },
     destroyTinymce() {
