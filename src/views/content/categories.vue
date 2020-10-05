@@ -16,7 +16,7 @@
           <div class="tree-li" slot-scope="{ node, data }">
               <span v-show="!data.extend" class="tree-title">{{ data.cateName }}</span>
               <span v-show="data.extend" class="tree-title">
-                <el-input style=" width:80%" v-show="data.extend"  placeholder="请输入中文名称" size="mini" v-model.trim="data.menuTitle"  auto-complete="off"></el-input>
+                <el-input style=" width:80%" v-show="data.extend"  placeholder="请输入中文名称" size="mini" v-model.trim="data.cateName"  auto-complete="off"></el-input>
               </span>
               <span class="tree-order">
                 <el-input-number size="mini" :min="0" @change = "() => updateOrder(data)"  v-model="data.orderNo"></el-input-number>
@@ -44,7 +44,7 @@ export default {
     return {
       loading: false,
       data:[],
-      defaultProps: {children: "children", label: "menuTitle"},
+      defaultProps: {children: "children", label: "cateName"},
       formLoading:false
     }
   },
@@ -61,11 +61,11 @@ export default {
       }
     },
     handleAddFirstCategory() {
-      var obj = {parentId:'0', orderNo:0, hidden:false, menuName:'',menuTitle:'',pathIds:['0'],extend:true};
+      var obj = {parentId:'0', orderNo:0, hidden:false, cateName:'',pathIds:['0'],extend:true};
       this.data.push(obj)
     },
     append(data) {
-      const newChild = {parentId:data.id, orderNo:0, hidden:false, menuName:'',menuTitle:'',pathIds:[...data.pathIds,data.id],extend:true};
+      const newChild = {parentId:data.id, orderNo:0, hidden:false, cateName:'',pathIds:[...data.pathIds,data.id],extend:true};
       if (!data.children) {
         this.$set(data, 'children', []);
       }
@@ -74,7 +74,7 @@ export default {
     remove(data,node) {
       if(data.id){
         this.$confirm("确认删除当前分类吗?", "提示", {type: "warning",}).then(async () => {
-          var res = await request.delete(config.menu+'/'+data.id);
+          var res = await request.delete(config.contentCate+'/'+data.id);
           if(res && res.code == '20000'){
             this.$message.success("删除成功");  
             this.getList();	
@@ -89,25 +89,24 @@ export default {
     },
     async updateOrder(data){
       var _data = {orderNo:data.orderNo};
-      var res = await request.put(config.menu+'/'+data.id,_data);
+      var res = await request.put(config.contentCate+'/'+data.id,_data);
       if(res && res.code == '20000'){
         this.getList();
       }
 		},
     async edit(data){
       if(data.extend){
-        if(data.menuTitle.length < 3 || data.menuName.length < 3){
+        if(data.cateName.length < 3){
           this.$message.error("菜单名称不少于3个字符！"); 	
         }else{
           var _id = data.id;
           if(_id){
             var _obj = {
-              menuName:data.menuName,
-              menuTitle:data.menuTitle,					
+              cateName:data.cateName,
             }
-            await request.put(config.menu+'/'+_id,_obj); 	
+            await request.put(config.contentCate+'/'+_id,_obj); 	
           }else{
-            await request.post(config.menu,data);	
+            await request.post(config.contentCate,data);	
           }
           data.extend = !data.extend;
         }

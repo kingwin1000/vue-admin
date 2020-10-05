@@ -158,26 +158,37 @@ export const constantRoutes = [
     },    
     children: [
       {
+        path: '/news/create',
+        component: () => import('@/views/content/create'),
+        meta: {
+          title: '添加资讯'
+        }
+      }, 			
+      {
+        path: '/content/categories',
+        component: () => import('@/views/content/categories'),
+        meta: {
+          title: '资讯分类树'
+        }
+      },		
+
+      {
+        path: '/news/tags',
+        component: () => import('@/views/content/tags'),
+        meta: {
+          title: '资讯标签'
+        }
+      }, 
+	
+      {
         path: '/news/index',
         component: () => import('@/views/system/role'),
         meta: {
           title: '资讯列表'
         }
       },
-      {
-        path: '/news/list',
-        component: () => import('@/views/system/admin'),
-        meta: {
-          title: '资讯分类树'
-        }
-      },
-      {
-        path: '/news/tags',
-        component: () => import('@/views/system/menu'),
-        meta: {
-          title: '资讯标签'
-        }
-      },      
+
+     
     ]
   },  
   

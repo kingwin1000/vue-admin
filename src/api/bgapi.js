@@ -6,4 +6,6 @@ export default {
 	adminList: `${host}/api/adminList`,
 	resources:`${host}/api/resources`,
 	delManyRes:`${host}/api/delManyRes`,
+	contentCate:`${host}/api/contentCategories`,
+	contentTags:`${host}/api/contentTags`,
 }
