@@ -181,8 +181,8 @@ export const constantRoutes = [
       }, 
 	
       {
-        path: '/news/index',
-        component: () => import('@/views/system/role'),
+        path: '/news/list',
+        component: () => import('@/views/content/list'),
         meta: {
           title: '资讯列表'
         }

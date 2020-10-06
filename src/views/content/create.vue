@@ -102,28 +102,38 @@ export default {
         this.$refs["dataForm"].clearValidate();
         // 刷新表单
         this.$refs["dataForm"].resetFields();
-      }
-      if(this.$refs["dataFormEdit"]){
-        // 清空验证信息表单
-        this.$refs["dataFormEdit"].clearValidate();
-        // 刷新表单
-        this.$refs["dataFormEdit"].resetFields();
-      }
+				this.formData = {title:'',titleImg:'',introduct:'', categories:[], tags:[], content:'', status:0};
+      	this.$refs.editor.setContent('');
+				this.imageUrl = '';
+			}
     },			
 		handleSave(){
 			this.$refs["dataForm"].validate(async valid => {
 				if(valid){
 					var res = await request.post(config.content,this.formData);	
 					if(res.code == '20000'){
-						this.$message.success('保存成功！');
-						this.formData = {title:'',titleImg:'',introduct:'', categories:[], tags:[], content:'', status:0};					
+						this.$message.success('保存成功！');					
+						this.resetForm();
 					}else{
 						this.$message.error('保存失败，请联系管理员！');	
 					}
 				}	
 			})	
 		},
-		
+		handleRelease(){
+			this.$refs["dataForm"].validate(async valid => {
+				if(valid){
+					this.formData.status = 1;
+					var res = await request.post(config.content,this.formData);	
+					if(res.code == '20000'){
+						this.$message.success('保存成功！');					
+						this.resetForm();
+					}else{
+						this.$message.error('保存失败，请联系管理员！');	
+					}
+				}	
+			})			
+		}
 		
 	}
 }
