@@ -27,7 +27,9 @@
       <el-table-column align="center"  label="标题" prop="title" show-overflow-tooltip>
 			</el-table-column>
       <el-table-column align="center"  label="分类" prop="categories" show-overflow-tooltip>
-				
+				<template slot-scope="scope">
+        	 {{ scope.row.categories | parseCate(categories)}}
+        </template>
 			</el-table-column>
   		<el-table-column align="center" label="点赞数" prop="likeNum" width="80"></el-table-column>
       <el-table-column align="center" label="浏览数" prop="clickNum" width="80"></el-table-column>
@@ -240,7 +242,7 @@ export default {
       })
       .then(async () => {
           let _ids = this.selectItme.map((item,index) =>{ return item.id});
-          var res = await request.post(config.delManyRes,{ids:_ids});
+          var res = await request.post(config.delManyContent,{ids:_ids});
           if(res.code == '20000'){
             this.$message.success("删除成功");  
             this.getList();	
@@ -256,7 +258,7 @@ export default {
             type: "warning",
         })
         .then(async () => {
-            var res = await request.delete(config.resources+'/'+row.id);
+            var res = await request.delete(config.content+'/'+row.id);
             if(res.code == '20000'){
               this.$message.success("删除成功");  
               this.getList();	
@@ -318,24 +320,46 @@ export default {
       this.videoUrl = '';
     },
     async editWare(row,index){
+			this.$router.push({path:'/news/edit',query: {id:row.id}})
+			/***
       if(this.editNum === ''){
         this.editNum = index;
       }else{
         this.editNum = '';
 				
         //var res = await request.put(config.resources,{id:row.id,file_name:this.list[index].name});
-        var res = await request.put(config.resources+'/'+row.id,{resName:this.list[index].resName})
+        //var res = await request.put(config.resources+'/'+row.id,{resName:this.list[index].resName})
 				//if(res.code == '20000'){
         //  this.$message.success("试卷编辑成功");
         //}
       }
+			***/
     }
   },
   filters: {
-    typeFilter(status) {
-      const typeMap = { 0: '图片', 1: '视频', 2: '音频', 3: '文本' }
-      return typeMap[status]
-    }
+		parseCate(cateIds,cateArr){
+			var arr = cateIds;
+			var data = cateArr;
+			function getCity(arr, data, city = []) {
+				if (typeof data === "object") {
+						for (let i = 0; arr[i] !== undefined; i++) {
+								for (let j = 0; data[j] !== undefined; j++) {
+										if (arr[i] === data[j].id) {
+												city.push(data[j].cateName);
+										}
+								}
+						};
+						for (let i = 0; data[i] !== undefined; i++) {
+								getCity(arr, data[i].children, city);
+						};
+				}
+				return city;
+			}
+
+			var str = getCity(arr,data).join('/')
+			
+			return str;
+		}
   },  
 }
 </script>

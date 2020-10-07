@@ -86,8 +86,8 @@ export const constantRoutes = [
         }
       },      
       {
-        path: '/index/user',
-        component: () => import('@/views/index/user'),
+        path: '/channel/index',
+        component: () => import('@/views/channel/index'),
         meta: {
           title: '频道管理'
         }
@@ -150,7 +150,7 @@ export const constantRoutes = [
   {
     path: '/news',
     hidden: false,
-    redirect: '/news/index',
+    redirect: '/news/create',
     component: Layout,
     meta: {
       title: '资讯管理',
@@ -187,7 +187,14 @@ export const constantRoutes = [
           title: '资讯列表'
         }
       },
-
+      {
+        path: '/news/edit',
+        component: () => import('@/views/content/edit'),
+        meta: {
+          title: '资讯编辑'
+        },
+				hidden:true
+      },
      
     ]
   },  
