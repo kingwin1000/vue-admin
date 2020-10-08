@@ -91,7 +91,14 @@ export const constantRoutes = [
         meta: {
           title: '频道管理'
         }
-      }
+      },
+      {
+        path: '/channel/setting',
+        component: () => import('@/views/channel/setting'),
+        meta: {
+          title: '频道配置'
+        }
+      }			
     ]
   },
   {

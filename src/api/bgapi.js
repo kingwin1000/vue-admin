@@ -11,4 +11,6 @@ export default {
 	contentTags:`${host}/api/contentTags`,
 	content:`${host}/api/content`,
 	delManyContent:`${host}/api/delManyContent`,
+	channel:`${host}/api/channel`,
+	addChannelChild:`${host}/api/addChannelChild`,
 }
