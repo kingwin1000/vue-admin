@@ -82,8 +82,13 @@ export default {
         this.$refs["dataForm"].resetFields();
       }			
 		},
-		append(data) {
-			
+		async append(data) {
+			console.log(data.id);
+			const newChild = {
+				name:'11',title:'新增',type:0,orderNo:0,resData:[],contentData:[]
+			};			
+			var res = await request.put(config.addChannelSetting+'/'+this.id,newChild);
+			/***
 			const newChild = {
 				name:'11',title:'新增',type:0,orderNo:0,resData:[],contentData:[],children:[]
 			};
@@ -91,6 +96,7 @@ export default {
 				this.$set(data, 'children', []);
 			}
 			data.children.push(newChild);
+			**/
 		},
 		remove(node, data) {
 			const parent = node.parent;

@@ -13,4 +13,5 @@ export default {
 	delManyContent:`${host}/api/delManyContent`,
 	channel:`${host}/api/channel`,
 	addChannelChild:`${host}/api/addChannelChild`,
+	addChannelSetting:`${host}/api/addChannelSetting`,
 }
