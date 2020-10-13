@@ -12,6 +12,7 @@ export default {
 	content:`${host}/api/content`,
 	delManyContent:`${host}/api/delManyContent`,
 	channel:`${host}/api/channel`,
-	addChannelChild:`${host}/api/addChannelChild`,
+	addChannelCate:`${host}/api/addChannelCate`,
+	getChannelCate:`${host}/api/getChannelCate`,	
 	addChannelSetting:`${host}/api/addChannelSetting`,
 }
