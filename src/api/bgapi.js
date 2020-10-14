@@ -14,5 +14,7 @@ export default {
 	channel:`${host}/api/channel`,
 	addChannelCate:`${host}/api/addChannelCate`,
 	getChannelCate:`${host}/api/getChannelCate`,	
+	delChannelCate:`${host}/api/delChannelCate`,
 	addChannelSetting:`${host}/api/addChannelSetting`,
+	getChannelRes:`${host}/api/getChannelRes`,
 }

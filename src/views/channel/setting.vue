@@ -17,67 +17,39 @@
           </span>
         </el-tree>
       </el-aside>
-      <el-main>
-      
-      	{{curItem.type}}
-        <el-select v-model="listQuery.type" placeholder="请选择状态">
-          <el-option label="资源" :value="0" />
-          <el-option label="资讯" :value="1" />
-        </el-select>  
-
-       	<el-cascader  :options="categories"  @change="categoriesChange"  :props="cateProps"></el-cascader>     	
-        <el-input  v-model.trim="listQuery.name"  placeholder="请输入内容标题" auto-complete="off"></el-input>
-        
-        
-
-
-   <el-table v-loading="loading" :data="list" border  @selection-change="handleSelectionChange">
-      <el-table-column align="center" width="100" type="selection"></el-table-column>
-      <el-table-column align="center" width="200" label="资源名称" prop="resName" show-overflow-tooltip>
-        <template slot-scope="scope">
-          <el-input v-if="editNum === scope.$index" size="mini"  v-model="scope.row.resName"></el-input>
-          <span v-else>{{scope.row.resName}}</span>
-        </template>
-      </el-table-column>      
-  
-      <el-table-column align="center" label="类型" prop="resType"  width="100">
-        <template slot-scope="scope">
-          <template>{{ scope.row.resType | typeFilter }}</template>
-        </template>
-      </el-table-column>     
-      
-  		<el-table-column align="center" label="大小" prop="resSize" width="100"></el-table-column>
-      
-
-      <el-table-column align="center" label="状态" prop="status"  width="100" >
-        <template slot-scope="scope">
-          <span style="color:green" v-if="scope.row.status == '0'">正常</span>
-          <span style="color:red" v-else-if="scope.row.status == '1'">禁止</span>
-        </template>
-      </el-table-column>
-      
-			<el-table-column align="center" label="上传时间" prop="created"  show-overflow-tooltip>
-        <template slot-scope="scope">
-          {{ scope.row.created | parseTime('{y}-{m}-{d} {h}:{i}') }}
-        </template>        
-      </el-table-column>   
-      
-      
-      <el-table-column align="center"  label="操作">
-      	<el-button-group slot-scope="scope">
-        	<el-button  type="primary" size="mini" @click.native.prevent="watchWare(scope.$index, scope.row)">预览</el-button>
-   				<el-button v-show="editNum !== scope.$index" type="primary" size="mini" @click.native.prevent="editWare(scope.row,scope.$index)">编辑</el-button>
-          <el-button v-show="editNum === scope.$index" type="warning" size="mini" @click.native.prevent="editWare(scope.row,scope.$index)">确认</el-button>   
-                     
-          <el-button type="danger" size="mini"  @click.native.prevent="handleDel(scope.$index, scope.row)">删除</el-button> 
-        </el-button-group>
-      </el-table-column>      
-         
-    </el-table>
-    <pagination :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.pageSize" @pagination="getList"/>
-
-
-
+      <el-main style=" padding:0 15px;">
+      <template v-if="curItem.type == 0">
+      	<el-form :inline="true" :model="listQueryRes" class="query-form">
+        	 <el-form-item>	
+            <el-select v-model="curItem.type" placeholder="请选择状态">
+              <el-option label="资源" :value="0" />
+              <el-option label="资讯" :value="1" />
+            </el-select>             
+          </el-form-item>
+           <el-form-item class="query-form-item">
+           		<el-input v-model="listQueryRes.resName" :clearable = "true" placeholder="请输入资源名称"></el-input>
+           </el-form-item>
+           <el-form-item>
+           		 <el-button type="primary" icon="el-icon-search"  @click="onSubmit">查询</el-button>
+           </el-form-item>
+        </el-form>
+        <el-table v-loading="loading" :data="listRes" border>
+        	<el-table-column align="center" width="70" type="selection"></el-table-column>
+          <el-table-column align="center" label="资源名称" prop="resName" show-overflow-tooltip></el-table-column>
+          <el-table-column align="center" label="类型" prop="resType"  width="100">
+            <template slot-scope="scope">
+              <template>{{ scope.row.resType | typeFilter }}</template>
+            </template>
+          </el-table-column>         
+        	<el-table-column align="center" label="大小" prop="resSize" width="100"></el-table-column>
+          <el-table-column align="center" label="上传时间" prop="created"  show-overflow-tooltip>
+            <template slot-scope="scope">
+              {{ scope.row.created | parseTime('{y}-{m}-{d} {h}:{i}') }}
+            </template>        
+          </el-table-column>        
+        </el-table>
+        <pagination :total="totalRes" :page.sync="listQueryRes.page" :limit.sync="listQueryRes.pageSize" @pagination="getResList"/>
+      </template>
         
         
         
@@ -121,23 +93,33 @@ export default {
 			formRules:{},
   		defaultProps: {children: 'children',label: 'title'},
 			curItem:{type:0},
-			listQuery:{type:0,name:''},
+			listQueryRes:{page:1,pageSize:10},
+			listRes:[],
+			loading:true,
+			totalRes:0,
+			
 			cateProps:{children: 'children', label: 'cateName' ,value:'id'},
 			categories:[],
-			list:[],	
+				
 		}
   },
   mounted(){
 		this.id = this.$route.query.id;
 		this.getList();
-		this.getCategories();
 		this.getResList();
+		//this.getCategories();
+		//
   },
   methods: {
 		async getResList(){
-			var res = await request.get(config.resources);	
-			this.list = res.data || [];
-			this.total = res.totalNum || 0;
+			this.loading = true;
+			var res = await request.get(config.getChannelRes,{params:this.listQueryRes});
+			this.loading = false;	
+			this.listRes = res.data || [];
+			this.totalRes = res.totalNum || 0;
+		},
+		onSubmit(){
+			this.getResList()
 		},
 		async getCategories(){
 			let res = await request.get(config.contentCate);
@@ -186,11 +168,15 @@ export default {
 			data.children.push(newChild);
 			**/
 		},
-		remove(node, data) {
+		async remove(node, data) {
+			var res = await request.delete(config.delChannelCate+'/'+data.id);
+			this.getList();
+			/**
 			const parent = node.parent;
 			const children = parent.data.children || parent.data;
 			const index = children.findIndex(d => d.id === data.id);
 			children.splice(index, 1);
+			**/
 		},
 		loadDate(data){
 			console.log(this.curItem.type);
@@ -200,7 +186,12 @@ export default {
 		categoriesChange(){
 		}	
 	},
-  filters: {},  
+  filters: {
+    typeFilter(status) {
+      const typeMap = { 0: '图片', 1: '视频', 2: '音频', 3: '文本' }
+      return typeMap[status]
+    }
+  },  
 }
 </script>
 <style scoped>
