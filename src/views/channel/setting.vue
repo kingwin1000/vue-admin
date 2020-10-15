@@ -31,10 +31,13 @@
            </el-form-item>
            <el-form-item>
            		 <el-button type="primary" icon="el-icon-search"  @click="onSubmit">查询</el-button>
+           		 <el-button type="primary" icon="el-icon-edit"  @click="onAddRes">关联</el-button>	
            </el-form-item>
         </el-form>
-        <el-table v-loading="loading" :data="listRes" border>
-        	<el-table-column align="center" width="70" type="selection"></el-table-column>
+        <el-table v-loading="loading" :data="listRes" border  @selection-change="handleSelectionChange">
+        	<el-table-column align="center" width="70" type="selection">
+
+          </el-table-column>
           <el-table-column align="center" label="资源名称" prop="resName" show-overflow-tooltip></el-table-column>
           <el-table-column align="center" label="类型" prop="resType"  width="100">
             <template slot-scope="scope">
@@ -105,6 +108,7 @@ export default {
   },
   mounted(){
 		this.id = this.$route.query.id;
+		this.selectItme = [];
 		this.getList();
 		this.getResList();
 		//this.getCategories();
@@ -113,6 +117,7 @@ export default {
   methods: {
 		async getResList(){
 			this.loading = true;
+			this.listQueryRes.channelCateId = this.curItem.channelCateId
 			var res = await request.get(config.getChannelRes,{params:this.listQueryRes});
 			this.loading = false;	
 			this.listRes = res.data || [];
@@ -179,9 +184,21 @@ export default {
 			**/
 		},
 		loadDate(data){
-			console.log(this.curItem.type);
-			this.curItem.type = data.type;	
+			//console.log('aaaaaaaa',data);
+			this.curItem.type = data.type;
+			this.curItem.channelCateId = data.id;
 			
+			this.getResList();
+		},
+		handleSelectionChange(val){
+			this.selectItme = val;
+		},
+		async onAddRes(){
+			if(this.selectItme.length == 0){return}
+			if(!this.curItem.channelCateId){return}
+			var _ids = this.selectItme.map((item,index) =>{ return item.id});
+			var res = await request.put(config.setChannelCate+'/'+this.curItem.channelCateId,{resData:_ids})
+			this.getResList();
 		},
 		categoriesChange(){
 		}	
