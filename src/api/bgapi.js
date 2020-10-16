@@ -18,4 +18,5 @@ export default {
 	setChannelCate:`${host}/api/setChannelCate`,
 	addChannelSetting:`${host}/api/addChannelSetting`,
 	getChannelRes:`${host}/api/getChannelRes`,
+	getChannelContent:`${host}/api/getChannelContent`,
 }
