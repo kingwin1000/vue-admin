@@ -32,21 +32,7 @@
           </div>
         </el-tree>
         
-        
-        <el-table
-    :data="data"
-    style="width: 100%;margin-bottom: 20px;"
-    row-key="id"
-    border
-    default-expand-all
-    :tree-props="defaultProps">
-    <el-table-column
-      prop="cateName"
-      label="标题"
-      width="180">
-    </el-table-column>
-
-  </el-table>
+       
         
         
         
