@@ -11,8 +11,8 @@
       		<span class="custom-tree-node" @click="() => loadDate(data)" slot-scope="{ node, data }">
           	<span>{{ node.label }}</span>
             <span>
-            	<el-button type="text" size="mini" @click="() => append(data)">Append</el-button>
-            	<el-button type="text" size="mini" @click="() => remove(node, data)">Delete</el-button>
+            	<el-button type="text" size="mini" @click.stop="() => append(data)">Append</el-button>
+            	<el-button type="text" size="mini" @click.stop="() => remove(node, data)">Delete</el-button>
             </span>
           </span>
         </el-tree>
@@ -279,6 +279,8 @@ export default {
 		},
 		async remove(node, data) {
 			var res = await request.delete(config.delChannelCate+'/'+data.id);
+			//console.log();
+			
 			this.getList();
 			/**
 			const parent = node.parent;
