@@ -26,14 +26,14 @@
                 <el-input style=" width:80%" size="mini" v-model.trim="data.menuName" placeholder="请输入英文名称" auto-complete="off"></el-input>
               </span>
               <span class="tree-order">
-              	<el-switch v-model="data.hidden" active-color="#ccc" inactive-color="#13ce66" @change="changeHidden(data)"></el-switch>
+              	<el-switch v-model="data.hidden" :active-value="false" :inactive-value="true" active-color="#13ce66" inactive-color="#ccc" @change="changeHidden(data)"></el-switch>
               </span>
               <span class="tree-order">
                 <el-input-number size="mini" :min="0" @change = "() => updateOrder(data)"  v-model="data.orderNo"></el-input-number>
               </span>
               <span class="tree-btns">  
               <el-button-group>
-                <el-button size="mini" type="primary" @click.native.prevent ="() => append(data)">添加子分类</el-button>
+                <el-button size="mini" :disabled="data.extend" type="primary" @click.native.prevent ="() => append(data)">添加子分类</el-button>
                 <el-button v-show="data.extend" size="mini" type="warning" @click="() => edit(data)">保存</el-button>
                 <el-button v-show="!data.extend" size="mini" type="primary" @click="() => edit(data)">编辑</el-button>
                 <el-button size="mini" type="danger"  @click="() => remove(data,node)">删除</el-button>
