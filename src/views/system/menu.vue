@@ -10,18 +10,23 @@
         <div class="tree-top">
           <span class="tree-title" style="padding-left:40px;">菜单名称</span>
           <span class="tree-name">菜单文件名称</span>
-            <span class="tree-order">排序</span>
-            <span class="tree-btns">操作</span>
+          <span class="tree-order">是否显示</span>
+          <span class="tree-order">排序</span>
+          <span class="tree-btns">操作</span>
         </div> 
         <el-tree :data="data" node-key="id" v-loading="loading" default-expand-all :expand-on-click-node="false" :props="defaultProps">
           <div class="tree-li" slot-scope="{ node, data }">
               <span v-show="!data.extend" class="tree-title">{{ data.menuTitle }}</span>
+
               <span v-show="data.extend" class="tree-title">
                 <el-input style=" width:80%" v-show="data.extend"  placeholder="请输入中文名称" size="mini" v-model.trim="data.menuTitle"  auto-complete="off"></el-input>
               </span>
               <span v-show="!data.extend" class="tree-name">{{ data.menuName }}</span>
               <span v-show="data.extend" class="tree-name">
                 <el-input style=" width:80%" size="mini" v-model.trim="data.menuName" placeholder="请输入英文名称" auto-complete="off"></el-input>
+              </span>
+              <span class="tree-order">
+              	<el-switch v-model="data.hidden" active-color="#ccc" inactive-color="#13ce66" @change="changeHidden(data)"></el-switch>
               </span>
               <span class="tree-order">
                 <el-input-number size="mini" :min="0" @change = "() => updateOrder(data)"  v-model="data.orderNo"></el-input-number>
@@ -57,6 +62,9 @@ export default {
     this.getList();
   },
   methods: {
+		async changeHidden(_data){
+			var res = await request.put(config.menu+'/'+_data.id,_data);
+		},
     async getList() {
       this.loading = true; 
       let res = await request.get(config.menu); 

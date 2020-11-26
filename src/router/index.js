@@ -4,7 +4,8 @@ import { getMenu } from '@/api/user'
 Vue.use(Router)
 
 /* Layout */
-import Layout from '@/layout'
+import Layout from '@/layout';
+import RouterPage from '@/layout/router';
 /**
  * Note: sub-menu only appear when route children.length >= 1
  * Detail see: https://panjiachen.github.io/vue-element-admin-site/guide/essentials/router-and-nav.html
@@ -59,153 +60,51 @@ export const constantRoutes = [
     component: () => import('@/views/error-page/401'),
     hidden: true
   },
-  {
-    path: '/',
-    hidden: false,
-    redirect: '/index/index',
-    component: Layout,
+	{
+		path: '/',
+		redirect: '/index/index',
+		component: Layout,
     meta: {
       title: '系统管理',
       icon:'system'
-    },    
-    children: [
+    }, 
+		children: [
       {
         path: '/index/index',
-        component: () => import('@/views/index/index'),
-        meta: {
-          title: '首页',
-          breadcrumb:false,
-        },
-        hidden:true,
-      },
-      {
-        path: '/index/setting',
         component: () => import('@/views/index/user'),
         meta: {
           title: '网站设置'
         }
-      },      
+      },
+			
       {
-        path: '/channel/index',
-        component: () => import('@/views/channel/index'),
+				path: '/channel',
+        redirect: '/channel/index',
+				component: RouterPage,
         meta: {
           title: '频道管理'
-        }
-      },
-      {
-        path: '/channel/setting',
-        component: () => import('@/views/channel/setting'),
-        meta: {
-          title: '频道配置'
-        }
-      }			
-    ]
-  },
-  {
-    path: '/system',
-    hidden: false,
-    redirect: '/system/role',
-    component: Layout,
-    meta: {
-      title: '系统设置',
-      icon:'system'
-    },    
-    children: [
-      {
-        path: '/system/role',
-        component: () => import('@/views/system/role'),
-        meta: {
-          title: '角色管理'
-        }
-      },
-      {
-        path: '/system/admin',
-        component: () => import('@/views/system/admin'),
-        meta: {
-          title: '账号管理'
-        }
-      },
-      {
-        path: '/system/menu',
-        component: () => import('@/views/system/menu'),
-        meta: {
-          title: '菜单管理'
-        }
-      },      
-    ]
-  },
-  {
-    path: '/ad',
-    hidden: false,
-    redirect: '/ad/index',
-    component: Layout,
-    meta: {
-      title: '资源管理',
-      icon:'system'
-    },    
-    children: [
-      {
-        path: '/ad/index',
-        component: () => import('@/views/ad/index'),
-        meta: {
-          title: '资源列表'
-        }
-      }  
-    ]
-  },
-
-  {
-    path: '/news',
-    hidden: false,
-    redirect: '/news/create',
-    component: Layout,
-    meta: {
-      title: '资讯管理',
-      icon:'system'
-    },    
-    children: [
-      {
-        path: '/news/create',
-        component: () => import('@/views/content/create'),
-        meta: {
-          title: '添加资讯'
-        }
-      }, 			
-      {
-        path: '/content/categories',
-        component: () => import('@/views/content/categories'),
-        meta: {
-          title: '资讯分类树'
-        }
-      },		
-
-      {
-        path: '/news/tags',
-        component: () => import('@/views/content/tags'),
-        meta: {
-          title: '资讯标签'
-        }
-      }, 
-	
-      {
-        path: '/news/list',
-        component: () => import('@/views/content/list'),
-        meta: {
-          title: '资讯列表'
-        }
-      },
-      {
-        path: '/news/edit',
-        component: () => import('@/views/content/edit'),
-        meta: {
-          title: '资讯编辑'
         },
-				hidden:true
-      },
-     
-    ]
-  },  
-  
+				children:[
+					{
+						path: '/channel/index',
+						component: () => import('@/views/channel/index'),
+						meta: {
+							title: '频道管理'
+						}
+					},
+					{
+						path: '/channel/setting',
+						component: () => import('@/views/channel/setting'),
+						meta: {
+							title: '频道配置',
+							activeMenu:'/channel/index',
+						},
+						hidden:true
+					}															
+				]
+      }												
+		]			
+	}
 ]
 
 /**
@@ -216,75 +115,80 @@ export const constantRoutes = [
 function setRoutersType(list,parentName){
 	console.log('list',list)
 	var asyncRoutesType = [];
-  /**
-     *
-  list.forEach(item => {
-
-   		var _routObj = {};
+	list.forEach(item => {
+		var _routObj = {};
 		if(item.children && item.children.length > 0){
 			if(item.parentId == '0'){
-				_routObj.path = '/'+item.menuTitle;	
-				_routObj.redirect = _routObj.path+'/'+item.children[0].menuTitle;
+				_routObj.path = '/'+item.menuName;
+				_routObj.redirect = _routObj.path+'/'+item.children[0].menuName;
 				_routObj.component = Layout;
 				_routObj.meta = {
-					title: item.menuName,
-					icon : item.menuTitle,
+					title: item.menuTitle,
+					icon : item.menuName,
 					breadcrumb:true,
-					roles:['324'],		
-				}
+					//roles:[]
+				};
 				_routObj.hidden = item.hidden;
-				_routObj.name = item.id; 
-				_routObj.children = setRoutersType(item.children,item.menuTitle);				
+				_routObj.name = item.id;
+				_routObj.children = setRoutersType(item.children,item.menuName);	 				
 				asyncRoutesType.push(_routObj);	
 			}else{
-
-
-
+				_routObj.path = '/'+parentName+'/'+item.menuName;
+				_routObj.redirect = _routObj.path+'/'+item.children[0].menuName;
+				_routObj.component = RouterPage;
+				_routObj.meta = {
+					title: item.menuTitle,
+					icon : item.menuName,
+					//roles: [],
+					breadcrumb:false			
+				};
+				_routObj.hidden = item.hidden;
+				_routObj.name = item.id;
+				_routObj.children = setRoutersType(item.children,parentName+'/'+item.menuName); 
+				asyncRoutesType.push(_routObj);				
 			}
 		}else{
 			if(item.parentId == '0'){
-				_routObj.path = '/'+item.menuTitle;
-				_routObj.redirect = _routObj.path+'/'+item.menuTitle;
+				_routObj.path = '/'+item.menuName;
+				_routObj.redirect = _routObj.path+'/'+item.menuName;
 				_routObj.component = Layout;
 				_routObj.meta = {
-					icon : item.menuTitle,
-					roles: item.roles,
-					//breadcrumb:item.type == '1' ? true : false,	
-					//activeMenu: item.active_path
+					icon : item.menuName,
+					//roles: item.roles,
+					breadcrumb:true,	
 				};
 				_routObj.hidden = item.hidden;
-				
-				let _componentUrl = item.menuTitle+'/'+item.menuTitle;
+				let _componentUrl = item.menuName+'/'+item.menuName;
 				_routObj.children = [{
-					path:item.menuTitle, 
+					path:item.menuName, 
 					name:item.id,
-					component : () => import(`@/views/${_componentUrl}`),	
+					component : () => import(`@/views/${_componentUrl}`),
 					meta :{
-						 title: item.menuName,
-						 roles: ['324'],
-						 breadcrumb:item.type == '1' ? true : false,
-						 //activeMenu: item.active_path		
+						 title: item.menuTitle,
+						 //roles: item.roles,
+						 breadcrumb:true,
 					}
 				}]
 				asyncRoutesType.push(_routObj);					
 			}else{
-
-				_routObj.path = item.menuTitle;
-				var _componentUrl = parentName+'/'+item.menuTitle;
-				_routObj.component =  require(`@/views/${_componentUrl}`).default;
+				console.log('11000000000',parentName);
+				_routObj.path = item.menuName;
+				var _componentUrl = parentName+'/'+item.menuName;
+				 _componentUrl = _componentUrl.replace(/^\/*/g, '');
+				//_routObj.component =  require(`@/views/${_componentUrl}`).default;
+				_routObj.component = (resolve) => require([`@/views/${_componentUrl}`], resolve)
 				_routObj.meta = {
-					title: item.menuName,
-					roles:['324'],
-					breadcrumb:false,	
-					activeMenu: parentName+'/'
+					title: item.menuTitle,
+					//roles:[],
+					breadcrumb:true,	
+					//activeMenu: parentName+'/'+item.menuName
 				};
-				_routObj.hidden = item.hidden;
+				_routObj.hidden = item.hidden;				
 				asyncRoutesType.push(_routObj);
 			}
 		}
 	})
-	** */
-
+	
 	return asyncRoutesType;	
 }
 
@@ -293,7 +197,8 @@ export async function asyncRoutes() {
   var _menu = await getMenu()
   if (_menu.code = 20000) {
    var _data = setRoutersType(_menu.data);
-    return _data;
+   console.log('eeee',_data);
+	 return _data;
   } else {
     return []
   }
