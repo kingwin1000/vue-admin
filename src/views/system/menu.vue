@@ -33,7 +33,7 @@
               </span>
               <span class="tree-btns">  
               <el-button-group>
-                <el-button size="mini" :disabled="data.extend" type="primary" @click.native.prevent ="() => append(data)">添加子分类</el-button>
+                <el-button size="mini" :disabled="data.extend"  type="primary" @click.native.prevent ="() => append(data)">添加子分类</el-button>
                 <el-button v-show="data.extend" size="mini" type="warning" @click="() => edit(data)">保存</el-button>
                 <el-button v-show="!data.extend" size="mini" type="primary" @click="() => edit(data)">编辑</el-button>
                 <el-button size="mini" type="danger"  @click="() => remove(data,node)">删除</el-button>
