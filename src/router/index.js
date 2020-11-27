@@ -34,6 +34,7 @@ import RouterPage from '@/layout/router';
  */
 
 export const constantRoutes = [
+	{ path: '*', redirect: '/404', hidden: true },
   {
     path: '/redirect',
     component: Layout,
@@ -60,6 +61,7 @@ export const constantRoutes = [
     component: () => import('@/views/error-page/401'),
     hidden: true
   },
+	
 	{
 		path: '/',
 		redirect: '/index/index',
@@ -116,6 +118,7 @@ function setRoutersType(list,parentName){
 	var asyncRoutesType = [];
 	list.forEach(item => {
 		var _routObj = {};
+		item.roles.push('admin')
 		if(item.children && item.children.length > 0){
 			if(item.parentId == '0'){
 				_routObj.path = '/'+item.menuName;
