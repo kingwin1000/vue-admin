@@ -2,7 +2,7 @@ const host = process.env.VUE_APP_BASE_API
 export default {
 	host: host,
   menu: `${host}/api/menu`,
-	menuAuth: `${host}/api/menuAuth`,
+	menuAddRoles: `${host}/api/menu/addRoles`,
 	adminRoles: `${host}/api/adminRoles`,
 	adminList: `${host}/api/adminList`,
 	resources:`${host}/api/resources`,

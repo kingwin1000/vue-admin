@@ -267,7 +267,7 @@ export default {
     async authFormSubmit(){
       this.authLoading = true;
       var checkedKeys = this.$refs.tree.getCheckedKeys();
-			
+			var parentCheckedKeys =  this.$refs.tree.getHalfCheckedKeys();
 			if (checkedKeys && checkedKeys.length == 0) {
           this.$alert("请至少选择一个权限", "提示", {
               confirmButtonText: "确定"
@@ -275,11 +275,12 @@ export default {
           this.authLoading = false;
           return false;
       }
-			var _data = {roleMenuIds:checkedKeys}
-			var res = await request.put(config.adminRoles+'/'+this.authFormData.id,_data);
+			var res = await request.put(config.adminRoles+'/'+this.authFormData.id,{roleMenuIds:checkedKeys});
+			var menuIds = parentCheckedKeys.concat(checkedKeys)
+			var info = await request.post(config.menuAddRoles,{roleId:this.authFormData.id,menuIds:menuIds})
 			this.authLoading = false;
       this.authFormVisible = false;             
-      if(res.code == '20000'){
+      if(info.code == '20000'){
         this.$message.success("授权成功");
 				this.getList();   
       }

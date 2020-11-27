@@ -20,7 +20,6 @@ function hasPermission(roles, route) {
  */
 export function filterAsyncRoutes(routes, roles) {
   const res = []
-
   routes.forEach(route => {
     const tmp = { ...route }
     if (hasPermission(roles, tmp)) {
@@ -30,7 +29,6 @@ export function filterAsyncRoutes(routes, roles) {
       res.push(tmp)
     }
   })
-
   return res
 }
 
@@ -51,7 +49,7 @@ const actions = {
     return new Promise( async resolve => {
       let _asyncRoutes = await asyncRoutes();
       let accessedRoutes = filterAsyncRoutes(_asyncRoutes, roles)
-			console.log(accessedRoutes)
+			//console.log(accessedRoutes)
       commit('SET_ROUTES', accessedRoutes)
       resolve(accessedRoutes)
     })

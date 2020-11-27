@@ -125,7 +125,7 @@ function setRoutersType(list,parentName){
 					title: item.menuTitle,
 					icon : item.menuName,
 					breadcrumb:true,
-					//roles:[]
+					roles: item.roles,
 				};
 				_routObj.hidden = item.hidden;
 				_routObj.name = item.id;
@@ -138,7 +138,7 @@ function setRoutersType(list,parentName){
 				_routObj.meta = {
 					title: item.menuTitle,
 					icon : item.menuName,
-					//roles: [],
+					roles: item.roles,
 					breadcrumb:false			
 				};
 				_routObj.hidden = item.hidden;
@@ -153,7 +153,7 @@ function setRoutersType(list,parentName){
 				_routObj.component = Layout;
 				_routObj.meta = {
 					icon : item.menuName,
-					//roles: item.roles,
+					roles: item.roles,
 					breadcrumb:true,	
 				};
 				_routObj.hidden = item.hidden;
@@ -164,7 +164,7 @@ function setRoutersType(list,parentName){
 					component : () => import(`@/views/${_componentUrl}`),
 					meta :{
 						 title: item.menuTitle,
-						 //roles: item.roles,
+						 roles: item.roles,
 						 breadcrumb:true,
 					}
 				}]
@@ -176,7 +176,7 @@ function setRoutersType(list,parentName){
 					_routObj.component = (resolve) => require([`@/views/${_componentUrl}`], resolve)
 					_routObj.meta = {
 						title: item.menuTitle,
-						//roles:[],
+						roles: item.roles,
 						breadcrumb:true,	
 						activeMenu: item.hidden ? '/'+parentName+'/index' : '/'+parentName+'/'+item.menuName,
 					};
