@@ -2,6 +2,11 @@
 <div class="app-container">
   <header class="app-header">
     <span class="title">{{$route.meta.title}}</span>
+    <div class="back" @click="goBack">
+      <i class="el-icon-back" ></i>
+      <el-divider direction="vertical"></el-divider>
+      <el-button type="text">返回</el-button>
+    </div>    
   </header>
   <div class="course-class" style="padding:0 15px;">
   	<el-form :model="formData" :rules="formRules" ref="dataForm">
@@ -74,6 +79,9 @@ export default {
 		this.setData();	
   },	
   methods: {
+		goBack(){
+			this.$router.back();
+		},
 		async setData(){
 			let categories = await request.get(config.contentCate);
       if(categories.code == '20000'){
@@ -144,6 +152,9 @@ export default {
 					if(res.code == '20000'){
 						this.$message.success('保存成功！');					
 						//this.resetForm();
+						setTimeout(()=>{
+							this.goBack();	
+						},500)
 					}else{
 						this.$message.error('保存失败，请联系管理员！');	
 					}
@@ -156,4 +167,5 @@ export default {
 </script>
 <style  scoped>
 .editor-content { margin-top: 20px;}
+.back { cursor:pointer;float: right; font-size:16px; margin-right:20px;}
 </style>

@@ -113,7 +113,6 @@ export const constantRoutes = [
  */
 
 function setRoutersType(list,parentName){
-	console.log('list',list)
 	var asyncRoutesType = [];
 	list.forEach(item => {
 		var _routObj = {};
@@ -171,18 +170,16 @@ function setRoutersType(list,parentName){
 				}]
 				asyncRoutesType.push(_routObj);					
 			}else{
-				console.log('11000000000',parentName);
 				_routObj.path = item.menuName;
 				var _componentUrl = parentName+'/'+item.menuName;
 				 _componentUrl = _componentUrl.replace(/^\/*/g, '');
-				//_routObj.component =  require(`@/views/${_componentUrl}`).default;
-				_routObj.component = (resolve) => require([`@/views/${_componentUrl}`], resolve)
-				_routObj.meta = {
-					title: item.menuTitle,
-					//roles:[],
-					breadcrumb:true,	
-					//activeMenu: parentName+'/'+item.menuName
-				};
+					_routObj.component = (resolve) => require([`@/views/${_componentUrl}`], resolve)
+					_routObj.meta = {
+						title: item.menuTitle,
+						//roles:[],
+						breadcrumb:true,	
+						activeMenu: item.hidden ? '/'+parentName+'/index' : '/'+parentName+'/'+item.menuName,
+					};
 				_routObj.hidden = item.hidden;				
 				asyncRoutesType.push(_routObj);
 			}
@@ -197,7 +194,6 @@ export async function asyncRoutes() {
   var _menu = await getMenu()
   if (_menu.code = 20000) {
    var _data = setRoutersType(_menu.data);
-   console.log('eeee',_data);
 	 return _data;
   } else {
     return []

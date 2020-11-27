@@ -320,7 +320,7 @@ export default {
       this.videoUrl = '';
     },
     async editWare(row,index){
-			this.$router.push({path:'/news/list/edit',query: {id:row.id}})
+			this.$router.push({path:'/content/list/edit',query: {id:row.id}})
 			/***
       if(this.editNum === ''){
         this.editNum = index;

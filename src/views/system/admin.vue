@@ -103,10 +103,10 @@
            <el-input disabled v-model="formEditData.username" placeholder="请输入用户名" auto-complete="off" />
         </el-form-item>
         <el-form-item label="登录密码" prop="new_password" label-width="80px">
-          <el-input v-model="formEditData.check_password" placeholder="请输入登录密码" type="password" auto-complete="off" />
+          <el-input v-model="formEditData.new_password" placeholder="请输入登录密码" type="password" auto-complete="off" />
         </el-form-item>
         <el-form-item label="确认密码" prop="check_password" label-width="80px">
-          <el-input v-model="formEditData.new_password" placeholder="请确认登录密码" type="password" auto-complete="off" />
+          <el-input v-model="formEditData.check_password" placeholder="请确认登录密码" type="password" auto-complete="off" />
         </el-form-item>
         <el-form-item label="状态" prop="status" label-width="80px">
           <el-radio-group v-model="formEditData.status">
@@ -155,7 +155,9 @@ export default {
 				var roleStr = '';
 				roleArr.forEach(item => {
 					let _role = rolesList.find(role=>role.id == item);
-					roleStr += _role.roleName+'/';
+					if(_role){
+						roleStr += _role.roleName+'/';
+					}
 				});
 				return roleStr.substr(0,roleStr.length-1);
 			}else{
@@ -302,15 +304,13 @@ export default {
               return false;
             } 
             var _role_ids = this.formEditData.role_ids;
-            this.formEditData.role_ids = this.formEditData.role_ids.length > 0 ? this.formEditData.role_ids.join(','):'';
-            //delete this.formEditData.check_password;
 						var _id = this.formEditData.id;
 						var _data = {
-							password : this.formEditData.password,
+							password : this.formEditData.new_password,
 							status : this.formEditData.status,
 							roles : this.formEditData.role_ids								
 						}; 
-						var res = await request.put(config.menu+'/'+_id,_data);
+						var res = await request.put(config.adminList+'/'+_id,_data);
             //var res = await request.post(config.editAdminUrl,this.formEditData);
             this.formLoading = false;
             this.formVisible = false;    
@@ -318,7 +318,7 @@ export default {
               this.list[this.index].status = this.formEditData.status;
               this.list[this.index].roles = _role_ids;
               this.$message.success('管理员修改成功！');
-            }          
+            }         
           }
         })				        
 			}else{    
