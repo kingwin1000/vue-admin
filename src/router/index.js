@@ -34,7 +34,6 @@ import RouterPage from '@/layout/router';
  */
 
 export const constantRoutes = [
-	{ path: '*', redirect: '/404', hidden: true },
   {
     path: '/redirect',
     component: Layout,
@@ -77,8 +76,7 @@ export const constantRoutes = [
         meta: {
           title: '网站设置'
         }
-      },
-			
+      },			
       {
 				path: '/channel',
         redirect: '/channel/index',
@@ -104,7 +102,22 @@ export const constantRoutes = [
 						hidden:true
 					}															
 				]
-      }												
+      },
+      {
+        path: '/index/resources',
+        component: () => import('@/views/index/resources'),
+        meta: {
+          title: '资源管理'
+        }
+      },			
+      {
+        path: '/index/menu',
+        component: () => import('@/views/index/menu'),
+        meta: {
+          title: '菜单管理',
+					roles:['admin']
+        }
+      },														
 		]			
 	}
 ]
@@ -118,7 +131,6 @@ function setRoutersType(list,parentName){
 	var asyncRoutesType = [];
 	list.forEach(item => {
 		var _routObj = {};
-		item.roles.push('admin')
 		if(item.children && item.children.length > 0){
 			if(item.parentId == '0'){
 				_routObj.path = '/'+item.menuName;
@@ -196,7 +208,9 @@ function setRoutersType(list,parentName){
 export async function asyncRoutes() {
   var _menu = await getMenu()
   if (_menu.code = 20000) {
+	 	
    var _data = setRoutersType(_menu.data);
+	 _data.push({ path: '*', redirect: '/404', hidden: true });
 	 return _data;
   } else {
     return []

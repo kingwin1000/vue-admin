@@ -49,7 +49,8 @@
       </el-table-column>
       <el-table-column label="角色" prop="roles">
         <template slot-scope="scope">
-          <template>{{ scope.row.roles | rolesFilter( rolesList )  }}</template>
+        	<template v-if="scope.row.username == 'admin'">超级管理员拥有所有权限</template>
+          <template v-else>{{ scope.row.roles | rolesFilter( rolesList )  }}</template>
         </template>
       </el-table-column>
       <el-table-column label="登录时间" width="200px" :show-overflow-tooltip="true">
@@ -108,13 +109,13 @@
         <el-form-item label="确认密码" prop="check_password" label-width="80px">
           <el-input v-model="formEditData.check_password" placeholder="请确认登录密码" type="password" auto-complete="off" />
         </el-form-item>
-        <el-form-item label="状态" prop="status" label-width="80px">
+        <el-form-item  v-if="formEditData.username != 'admin'" label="状态" prop="status" label-width="80px">
           <el-radio-group v-model="formEditData.status">
             <el-radio :label="1">正常</el-radio>
             <el-radio :label="0">禁用</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="角色" prop="roles" label-width="80px">
+        <el-form-item  v-if="formEditData.username != 'admin'" label="角色" prop="roles" label-width="80px">
           <el-checkbox-group v-model="formEditData.role_ids">
             <el-checkbox :disabled="item.status == '0'" v-for="item in rolesList" :key="item.id" :label="item.id">{{ item.roleName }}</el-checkbox>
           </el-checkbox-group>
