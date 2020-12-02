@@ -15,4 +15,6 @@ export default {
 .app-header .title{ float:left; font-size:23px; border-left:3px solid #1f2f3d; padding-left:10px; vertical-align:middle}
 .query-form{ background:#FAFAFA; border-radius:4px; padding:23px 0 0 20px; margin-bottom:10px}
 .el-table th.gutter {display: table-cell !important}
+button.el-button{ border-radius:2px !important;}
+
 </style>
