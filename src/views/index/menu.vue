@@ -132,7 +132,7 @@ export default {
 }
 </script>
 <style  scoped>
-.classify{border:1px solid #e1e1e1; border-bottom:0; min-width:800px;}
+.classify{border:1px solid #e1e1e1; border-bottom:0; min-width:990px;}
 .classify >>> .el-tree-node__content{height: 40px; border-bottom: 1px solid #e1e1e1;line-height: 40px;}
 .classify >>> .el-tree-node__expand-icon{ padding:0 15px;}
 .classify >>> .el-tree__empty-block{ border-bottom: 1px solid #e1e1e1;}
