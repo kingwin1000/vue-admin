@@ -39,6 +39,10 @@ export default {
           default:'',
           type:String         
         },
+        id:{
+          default:'',
+          type:String         
+        },				
         type:{
           default:'image',
           type:String         
@@ -73,6 +77,7 @@ export default {
 						resUrl:res.data,
 						resSize:this.resSize
 					};
+					if(this.id){_data.id = this.id}
           this.$emit("on-select",_data);  
         }else{
           this.$message.error("网络出现错误，请稍后再试");
@@ -122,10 +127,10 @@ export default {
 };
 </script>
 <style>
-.avatar-uploader{width:120px; height:120px; text-align: center;}
+.avatar-uploader{width:250px; height:120px; text-align: center;}
 .avatar-uploader .el-upload { border: 1px dashed #DCDFE6;border-radius: 6px;cursor: pointer;position: relative;overflow: hidden;width:100%; height:100%;}
 .avatar-uploader .el-upload:hover {border-color: #409EFF;}
 .avatar-uploader-icon {font-size: 28px;color: #8c939d;text-align: center;width:100%; height:100%;display:flex;justify-content:center; align-items:center;}
-.avatar {max-width:100%;}
-.avatar-uploader .el-upload-dragger{ width:118px; height:118px; border:none;border-radius: 6px; display:flex;justify-content:center; align-items:center;}
+.avatar {max-width:100%; max-height:100%;}
+.avatar-uploader .el-upload-dragger{ width:248px; height:118px; border:none;border-radius: 6px; display:flex;justify-content:center; align-items:center;}
 </style>
