@@ -103,7 +103,7 @@
           :imageUrl="imageUrl" @on-select="onSelect"></SingleUpload>
           <div class="el-upload__tip">只能上传{{typeName[upLoadData.resType]}}文件，且不超过{{sizeName[upLoadData.resType]}}M</div>
         </el-form-item>
-        <el-form-item label="资源文本"  label-width="100px" class="query-form-item">
+        <el-form-item label="资源文本"  label-width="100px" prop="resContent" class="query-form-item">
         	<el-input type="textarea" :rows="5" placeholder="请输入文本内容，可适当加HTML标签" style="width:400px;" v-model="upLoadData.resContent"></el-input>
         </el-form-item>        
       </el-form>
@@ -239,7 +239,6 @@ export default {
 			}			
 		},
 		async goToDel(item){
-			if(this.listGroup.length < 3){this.$message.error('资源组合包不能少于2个资源！');return}
 			var res = await request.put(config.groupRes+'/'+this.listGroupQuery.groupNum,{type:'del',id:item.id})	
 			if(res.code == '20000'){
 				this.getGroupItems();
@@ -251,7 +250,7 @@ export default {
 			this.getList()		
 		},
 		async groupWare(){
-			if(this.selectItme.length < 2){this.$message.error('资源组合的个数必须大于一个！'); return}
+			if(this.selectItme.length > 10){this.$message.error('资源组合的个数必须不能大于10个！'); return}
 			var _name = '';
 			var _size = 0;
 			var _hasGroup = false;
@@ -369,8 +368,13 @@ export default {
         .then(async () => {
             var res = await request.delete(config.resources+'/'+row.id);
             if(res.code == '20000'){
-              this.$message.success("删除成功");  
-              this.getList();	
+							if(res.type == 'del'){
+								this.$message.success("删除成功");  
+								this.getList();	
+							}else{
+								this.list = res.data || [];
+								this.$message.error("该组合资源包含此资源，删除失败！");	
+							}
             }
         })
         .catch(() => {

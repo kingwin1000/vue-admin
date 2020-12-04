@@ -32,7 +32,7 @@
         </el-form-item>
         
         <el-form-item label="内容详情" prop="content" label-width="120px" >
-        	<Tinymce ref="editor" v-model="formData.content" menubar="" :height="400" class="editor" />   
+        	<Tinymce ref="editor" v-model="formData.content" menubar="" :height="500" class="editor" />   
         </el-form-item>
          <el-form-item   label-width="120px" >	
             <el-button type="warning" icon="el-icon-edit-outline" :loading="loading" @click.native="handleSave">保存</el-button> 

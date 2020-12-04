@@ -3,11 +3,14 @@
      <!-- 标题 -->
    	<header class="app-header">
     	<span class="title">{{$route.meta.title}}</span>
-      <el-button type="primary" icon="el-icon-edit" @click.native="addChannelCate">添加分类</el-button>
+      <el-button type="primary" icon="el-icon-edit" @click.native="addChannelCate">添加频道分类</el-button>
     </header> 
     <el-container  style=" padding:0">
       <el-aside width="300px" style=" background:#FAFAFA; padding:10px">
-  			<el-tree :data="treeList" :props="defaultProps" :highlight-current="true" :expand-on-click-node="false" node-key="id" default-expand-all>	
+  			<div class="query-form">
+        	分类配置
+        </div>
+        <el-tree :data="treeList" :props="defaultProps" :highlight-current="true" :expand-on-click-node="false" node-key="id" default-expand-all>	
       		<span class="custom-tree-node" @click="() => loadDate(data)" slot-scope="{ node, data }">
           	<span>{{ node.label }}</span>
             <span>

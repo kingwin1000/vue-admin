@@ -20,7 +20,7 @@ import toolbar from './toolbar'
 import load from './dynamicLoadScript'
 import request from '@/utils/request';
 // why use this cdn, detail see https://github.com/PanJiaChen/tinymce-all-in-one
-const tinymceCDN = 'https://cdn.jsdelivr.net/npm/tinymce-all-in-one@4.9.3/tinymce.min.js'
+const tinymceCDN = 'https://cdn.jsdelivr.net/npm/tinymce-all-in-one@4.9.3/tinymce.min.js';
 const host = process.env.VUE_APP_BASE_API;
 const uploadUrl = `${host}/api/upload`
 
@@ -52,7 +52,7 @@ export default {
     height: {
       type: [Number, String],
       required: false,
-      default: 360
+      default: 500
     },
     width: {
       type: [Number, String],
@@ -103,7 +103,7 @@ export default {
     this.destroyTinymce()
   },
   destroyed() {
-    this.destroyTinymce()
+   // this.destroyTinymce()
   },
   methods: {
     init() {
