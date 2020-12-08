@@ -3,22 +3,40 @@
      <!-- 标题 -->
    	<header class="app-header">
     	<span class="title">{{$route.meta.title}}</span>
-      <el-button type="primary" icon="el-icon-edit" @click.native="addChannelCate">添加频道分类</el-button>
+      <div class="back" @click="goBack">
+        <i class="el-icon-back" ></i>
+        <el-divider direction="vertical"></el-divider>
+        <el-button type="text">返回</el-button>
+      </div>
     </header> 
-    <el-container  style=" padding:0">
-      <el-aside width="300px" style=" background:#FAFAFA; padding:10px">
-  			<div class="query-form">
-        	分类配置
+    <el-container  style="padding:0">
+      <el-aside class="classify" width="300px">
+  			<div class="tit-path">
+        	频道配置
+          <el-button-group class="tit-btn">
+          	<el-button type="primary" icon="el-icon-document-add" size="mini" @click.native="addChannelCate">添加</el-button>
+          	<el-button type="primary" icon="el-icon-s-tools" size="mini">设置</el-button>
+        	</el-button-group>
         </div>
-        <el-tree :data="treeList" :props="defaultProps" :highlight-current="true" :expand-on-click-node="false" node-key="id" default-expand-all>	
-      		<span class="custom-tree-node" @click="() => loadDate(data)" slot-scope="{ node, data }">
-          	<span>{{ node.label }}</span>
-            <span>
-            	<el-button type="text" size="mini" @click.stop="() => append(data)">Append</el-button>
-            	<el-button type="text" size="mini" @click.stop="() => remove(node, data)">Delete</el-button>
-            </span>
-          </span>
+        
+        <el-tree  :data="treeList" :props="defaultProps" :highlight-current="true" :expand-on-click-node="false" node-key="id" default-expand-all>	
+            <div class="tree-path" slot-scope="{ node, data }">
+              <span v-show="!data.extend" class="tree-title">{{  data.name }}</span>
+              <span v-show="data.extend" class="tree-title">
+                <el-input style="width:100%;"  placeholder="输入英文名称" size="mini" v-model.trim="data.name" auto-complete="off"></el-input>
+              </span>
+              <el-button-group class="tit-btn">
+              	
+                <el-button v-show="data.extend" type="warning" size="mini" icon="el-icon-document-checked" @click.stop="() => append(data)"></el-button>
+                <el-button v-show="!data.extend" type="primary" size="mini" icon="el-icon-edit" @click.stop="() => changeState(data)"></el-button>
+                
+                <el-button v-if="data.parentId == '0'" :disabled="data.extend" type="primary" size="mini" icon="el-icon-document-add" @click.stop="() => appendChild(data)"></el-button>
+                
+                <el-button type="danger" icon="el-icon-delete" size="mini" @click.stop="() => remove(node, data)"></el-button>
+             </el-button-group>
+            </div>
         </el-tree>
+        
       </el-aside>
       <el-main style=" padding:0 15px;">
       <template v-if="curItem.type == 0">
@@ -33,8 +51,10 @@
            		<el-input v-model="listQueryRes.resName" :clearable = "true" placeholder="请输入资源名称"></el-input>
            </el-form-item>
            <el-form-item>
+           		<el-button-group>
            		 <el-button type="primary" icon="el-icon-search"  @click="onSubmit">查询</el-button>
            		 <el-button type="primary" icon="el-icon-edit"  @click="onAddRes">关联</el-button>	
+           		</el-button-group>
            </el-form-item>
         </el-form>
         <el-table  ref="multipleTable" key="1" v-loading="loading" row-key="id" :data="listRes" border  @selection-change="handleSelectionChange">
@@ -76,8 +96,10 @@
             <el-cascader :options="categories" :props="cateProps"  :clearable = "true" v-model="listQueryContent.categories"></el-cascader>
           </el-form-item>           
            <el-form-item>
+           		<el-button-group>
            		 <el-button type="primary" icon="el-icon-search"  @click="onSubmit">查询</el-button>
            		 <el-button type="primary" icon="el-icon-edit"  @click="onAddContent">关联</el-button>	
+           		</el-button-group>
            </el-form-item>          	
         </el-form>
 				<el-table  ref="multipleTable" key="2"  v-loading="loading" row-key="id" :data="listContent" border  @selection-change="handleSelectionChange">
@@ -123,23 +145,7 @@
         
         
       </el-main>   	
-		</el-container>
-    
-    <el-dialog title="添加频道分类" :visible.sync="formVisible" :before-close="hideForm" :close-on-click-modal="false" width="50%" top="5vh">
-        <el-form :model="formData" :rules="formRules" ref="dataForm">
-            <el-form-item label="频道分类名称" label-width="130px"  prop="name">
-                <el-input v-model="formData.name" placeholder="请输入英文频道名称" auto-complete="off"></el-input>
-            </el-form-item>
-            <el-form-item label="频道分类标题" label-width="130px"  prop="title">
-                <el-input v-model="formData.title" placeholder="请输入中文频道名称" auto-complete="off"></el-input>
-            </el-form-item>                       					
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-            <el-button @click.native="hideForm">取消</el-button>
-            <el-button type="primary" @click.native="formSubmit()" :loading="formLoading">提交</el-button>
-        </div>         
-    </el-dialog>      
-    
+		</el-container>    
   </div>
 </template>
 <script>
@@ -153,10 +159,9 @@ export default {
   data() {
     return {
 			treeList:[],
-			formVisible:false,
 			formLoading:false,
 			formData:{
-				name:'',title:'',type:0,orderNo:0,resData:[],contentData:[]
+				name:'',type:0,orderNo:0,resData:[],contentData:[]
 			},
 			formRules:{},
   		defaultProps: {children: 'children',label: 'title'},
@@ -181,6 +186,9 @@ export default {
 		this.getContentList();
   },
   methods: {
+		goBack(){
+			this.$router.back();
+		},		
 		changeCurItem(){
 			this.$refs.multipleTable.clearSelection();
 			if(this.curItem.type == '0'){
@@ -218,11 +226,9 @@ export default {
 		async onAddContent(){
 			if(!this.curItem.channelCateId){return}
 			var _ids = this.selectContentItme.map((item,index) =>{ return item.id});
-			
 			var res = await request.put(config.setChannelCate+'/'+this.curItem.channelCateId,{type:1, contentData:_ids})
 			this.listQueryContent.page = 1;
-			this.getContentList();				
-			
+			this.getContentList();
 		},
 		
 
@@ -240,7 +246,8 @@ export default {
       }					
 		},
 		addChannelCate(){
-			this.formVisible = !this.formVisible;
+			let _data = {title:'newBranch',type:0,orderNo:0,extend:true};
+			this.treeList.push(_data);		
 		},
 		async getList(){
 			var res = await request.get(config.getChannelCate,{params:{channelId:this.id}});
@@ -251,46 +258,50 @@ export default {
 			this.formData.channelId = this.id;
 			var res = await request.post(config.addChannelCate,this.formData);
 			this.formLoading = true;
-			this.formVisible = false;
 			this.getList();
 		},
-		hideForm(){
-      if (this.$refs["dataForm"]) {
-        // 清空验证信息表单
-        this.$refs["dataForm"].clearValidate();
-        // 刷新表单
-        this.$refs["dataForm"].resetFields();
-      }
-			this.formVisible = false;				
+		changeState(data){
+			if(data.id){
+				data.extend	 = true;
+			}			
+		},
+		async appendChild(data){
+			const newChild = {parentId:data.id, orderNo:0, hidden:false, name:'',channelId:this.id, extend:true};
+	    if (!data.children) {
+        this.$set(data, 'children', []);
+      }	
+			data.children.push(newChild);
 		},
 		async append(data) {
-			//console.log(data.id);
-			var newChild = {
-				name:'111',title:'新增',type:0,orderNo:0,resData:[],contentData:[], parentId:data.id,channelId:this.id
-			};			
-			var res = await request.post(config.addChannelCate,newChild);
-			this.getList();
-			/***
-			const newChild = {
-				name:'11',title:'新增',type:0,orderNo:0,resData:[],contentData:[],children:[]
-			};
-			if (!data.children) {
-				this.$set(data, 'children', []);
+			console.log(data.id);
+			if(!data.name){this.$message.error('请输入英文分类名称！');return;}
+			if(data.id){
+				var res = await request.put(config.setChannelCate+'/'+data.id,{name:data.name});
+				if(res.code == '20000'){
+					data.extend	 = false;
+				}				
+			}else{
+				data.id = data.id ? data.id : '0';
+				var newChild = {
+					name:data.name,type:0,orderNo:0,parentId:data.id,channelId:this.id
+				};	
+				console.log(newChild);		
+				var res = await request.post(config.addChannelCate,newChild);
+				if(res.code == '20000'){
+					data.extend	 = false;
+				}
 			}
-			data.children.push(newChild);
-			**/
 		},
 		async remove(node, data) {
-			var res = await request.delete(config.delChannelCate+'/'+data.id);
-			//console.log();
-			
-			this.getList();
-			/**
-			const parent = node.parent;
-			const children = parent.data.children || parent.data;
-			const index = children.findIndex(d => d.id === data.id);
-			children.splice(index, 1);
-			**/
+			if(data.id){
+				var res = await request.delete(config.delChannelCate+'/'+data.id);
+				this.getList();
+			}else{
+				const parent = node.parent;
+				const children = parent.data.children || parent.data;
+				const index = children.findIndex(d => d.id === data.id);
+				children.splice(index, 1);
+			}
 		},
 		loadDate(data){
 			//console.log('aaaaaaaa',data);
@@ -320,8 +331,6 @@ export default {
 			this.listQueryRes.page = 1;
 			this.getResList();
 		},
-		categoriesChange(){
-		}	
 	},
   filters: {
     typeFilter(status) {
@@ -355,12 +364,13 @@ export default {
 }
 </script>
 <style scoped>
-.custom-tree-node {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 14px;
-    padding-right: 8px;
-  }
+.tit-path{ padding:0 0 0 8px;  margin:0px 0 20px; font-size:16px; }
+.tit-btn{ float:right; border-radius:25px; margin-top:3px;}
+.tit-btn >>> button.el-button{height:25px; line-height:25px; padding:0 8px;}
+
+.tree-path{flex: 1; display: flex; align-items: center; font-size:14px; justify-content: space-between;}
+.custom-tree-node { height:50px; padding:0; margin:0; vertical-align:middle; border:1px solid blue;}	
+.classify { background:#FAFAFA; padding:10px}
+.classify >>> .el-tree-node__content{height: 40px; line-height: 40px; padding-right:10px;}
+.tree-title >>> .el-input__inner{ padding-left:5px; margin-left:-5px;}
 </style>

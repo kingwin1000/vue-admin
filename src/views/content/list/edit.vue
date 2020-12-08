@@ -167,5 +167,5 @@ export default {
 </script>
 <style  scoped>
 .editor-content { margin-top: 20px;}
-.back { cursor:pointer;float: right; font-size:16px; margin-right:20px;}
+
 </style>

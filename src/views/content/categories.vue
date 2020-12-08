@@ -19,7 +19,7 @@
                 <el-input style=" width:80%" v-show="data.extend"  placeholder="请输入中文名称" size="mini" v-model.trim="data.cateName"  auto-complete="off"></el-input>
               </span>
               <span class="tree-order">
-                <el-input-number size="mini" :min="0" @change = "() => updateOrder(data)"  v-model="data.orderNo"></el-input-number>
+                <el-input-number  size="mini"  :min="0" @change = "() => updateOrder(data)"  v-model="data.orderNo"></el-input-number>
               </span>
               <span class="tree-btns">  
               <el-button-group>
