@@ -15,23 +15,19 @@
         	频道配置
           <el-button-group class="tit-btn">
           	<el-button type="primary" icon="el-icon-document-add" size="mini" @click.native="addChannelCate">添加</el-button>
-          	<el-button type="primary" icon="el-icon-s-tools" size="mini">设置</el-button>
+          	<el-button type="primary" @click="changeSettIngFn" :icon="changeSettIng ? 'el-icon-open':'el-icon-turn-off'" size="mini">设置</el-button>
         	</el-button-group>
-        </div>
-        
-        <el-tree  :data="treeList" :props="defaultProps" :highlight-current="true" :expand-on-click-node="false" node-key="id" default-expand-all>	
-            <div class="tree-path" slot-scope="{ node, data }">
+        </div> 
+        <el-tree  :data="treeList"   draggable  @node-drag-end="handleDragEnd" :props="defaultProps" :highlight-current="true" :expand-on-click-node="false" node-key="id" default-expand-all>	
+            <div class="tree-path" slot-scope="{ node, data }"  @click="loadDate(data)">
               <span v-show="!data.extend" class="tree-title">{{  data.name }}</span>
               <span v-show="data.extend" class="tree-title">
                 <el-input style="width:100%;"  placeholder="输入英文名称" size="mini" v-model.trim="data.name" auto-complete="off"></el-input>
               </span>
-              <el-button-group class="tit-btn">
-              	
-                <el-button v-show="data.extend" type="warning" size="mini" icon="el-icon-document-checked" @click.stop="() => append(data)"></el-button>
-                <el-button v-show="!data.extend" type="primary" size="mini" icon="el-icon-edit" @click.stop="() => changeState(data)"></el-button>
-                
+              <el-button-group class="tit-btn" v-if="changeSettIng">
+              	<el-button v-show="!data.extend" type="primary" size="mini" icon="el-icon-edit" @click.stop="() => changeState(data)"></el-button>
+                <el-button v-show="data.extend" type="warning" size="mini" icon="el-icon-document-checked" @click.stop="() => updateList(data)"></el-button>
                 <el-button v-if="data.parentId == '0'" :disabled="data.extend" type="primary" size="mini" icon="el-icon-document-add" @click.stop="() => appendChild(data)"></el-button>
-                
                 <el-button type="danger" icon="el-icon-delete" size="mini" @click.stop="() => remove(node, data)"></el-button>
              </el-button-group>
             </div>
@@ -163,6 +159,7 @@ export default {
 			formData:{
 				name:'',type:0,orderNo:0,resData:[],contentData:[]
 			},
+			changeSettIng:false,
 			formRules:{},
   		defaultProps: {children: 'children',label: 'title'},
 			curItem:{type:1},
@@ -181,21 +178,20 @@ export default {
 		this.id = this.$route.query.id;
 		this.selectItme = [];
 		this.getList();
-		this.getResList();
-		this.getCategories();
-		this.getContentList();
+		//this.getResList();
+		//this.getCategories();
+		//this.getContentList();
   },
   methods: {
-		goBack(){
-			this.$router.back();
+		async getList(){
+			var res = await request.get(config.getChannelCate,{params:{channelId:this.id}});
+			this.treeList = res.data;	
 		},		
-		changeCurItem(){
-			this.$refs.multipleTable.clearSelection();
-			if(this.curItem.type == '0'){
-				this.getResList()
-			}else if(this.curItem.type == '1'){
-				this.getContentList()	
-			}	
+		async getCategories(){
+			let res = await request.get(config.contentCate);
+      if(res.code == '20000'){
+        this.categories = res.data;
+      }					
 		},
 		async getResList(){
 			this.listQueryRes.channelCateId = this.curItem.channelCateId;
@@ -209,7 +205,7 @@ export default {
 				})				
 			})
 			this.totalRes = res.totalNum || 0;
-		},		
+		},				
 		async getContentList(){
 			this.listQueryContent.channelCateId = this.curItem.channelCateId
 			var res = await request.get(config.getChannelContent,{ params:this.listQueryContent } );	
@@ -222,70 +218,37 @@ export default {
 				})				
 			})			
 			this.totalContent = res.totalNum || 0;		 
-		},
-		async onAddContent(){
-			if(!this.curItem.channelCateId){return}
-			var _ids = this.selectContentItme.map((item,index) =>{ return item.id});
-			var res = await request.put(config.setChannelCate+'/'+this.curItem.channelCateId,{type:1, contentData:_ids})
-			this.listQueryContent.page = 1;
-			this.getContentList();
-		},
-		
-
-		onSubmit(){
-			if(this.curItem.type == '0'){
-				this.getResList()
-			}else if(this.curItem.type == '1'){
-				this.getContentList()	
-			}
-		},
-		async getCategories(){
-			let res = await request.get(config.contentCate);
-      if(res.code == '20000'){
-        this.categories = res.data;
-      }					
-		},
+		},		
+		changeSettIngFn(){
+			this.changeSettIng = !this.changeSettIng;
+		},		
 		addChannelCate(){
-			let _data = {title:'newBranch',type:0,orderNo:0,extend:true};
+			let _data = {id:'',channelId:this.id,name:'',type:0,orderNo:0,parentId:'0',extend:true};
 			this.treeList.push(_data);		
-		},
-		async getList(){
-			var res = await request.get(config.getChannelCate,{params:{channelId:this.id}});
-			this.treeList = res.data;	
-		},
-		async formSubmit(){
-			this.formLoading = false;
-			this.formData.channelId = this.id;
-			var res = await request.post(config.addChannelCate,this.formData);
-			this.formLoading = true;
-			this.getList();
-		},
+		},		
 		changeState(data){
-			if(data.id){
-				data.extend	 = true;
-			}			
-		},
+			if(data.id){data.extend	 = true}			
+		},		
 		async appendChild(data){
-			const newChild = {parentId:data.id, orderNo:0, hidden:false, name:'',channelId:this.id, extend:true};
+			const newChild = {parentId:data.id,type:0,orderNo:0, name:'',channelId:this.id, extend:true};
 	    if (!data.children) {
         this.$set(data, 'children', []);
       }	
 			data.children.push(newChild);
-		},
-		async append(data) {
-			console.log(data.id);
+		},		
+		async updateList(data) {
 			if(!data.name){this.$message.error('请输入英文分类名称！');return;}
 			if(data.id){
+				/*update*/
 				var res = await request.put(config.setChannelCate+'/'+data.id,{name:data.name});
 				if(res.code == '20000'){
 					data.extend	 = false;
 				}				
 			}else{
-				data.id = data.id ? data.id : '0';
+				/*add*/
 				var newChild = {
-					name:data.name,type:0,orderNo:0,parentId:data.id,channelId:this.id
+					name:data.name,type:0,orderNo:0,parentId:data.parentId,channelId:this.id
 				};	
-				console.log(newChild);		
 				var res = await request.post(config.addChannelCate,newChild);
 				if(res.code == '20000'){
 					data.extend	 = false;
@@ -302,9 +265,9 @@ export default {
 				const index = children.findIndex(d => d.id === data.id);
 				children.splice(index, 1);
 			}
-		},
+		},	
 		loadDate(data){
-			//console.log('aaaaaaaa',data);
+			console.log('aaaaaaaa',data);
 			this.$refs.multipleTable.clearSelection();
 			this.curItem.type = data.type;
 			this.curItem.channelCateId = data.id;
@@ -314,7 +277,69 @@ export default {
 			}else if(this.curItem.type == '1'){
 				this.getContentList()	
 			}	
+		},		
+		
+		 handleDragEnd(draggingNode, dropNode, dropType, ev) {
+			console.log('tree drag end: ', draggingNode);
+			return;
+			//this.treeList = this.treeList;
+		},	
+		
+		
+		
+		
+		
+			
+		changeCurItem(){
+			this.$refs.multipleTable.clearSelection();
+			if(this.curItem.type == '0'){
+				this.getResList()
+			}else if(this.curItem.type == '1'){
+				this.getContentList()	
+			}	
+		},		
+		
+		
+		
+		
+
+		goBack(){
+			this.$router.back();
+		},		
+
+		
+
+		async onAddContent(){
+			
+			if(!this.curItem.channelCateId){return}
+			var _ids = this.selectContentItme.map((item,index) =>{ return item.id});
+			var res = await request.put(config.setChannelCate+'/'+this.curItem.channelCateId,{type:1, contentData:_ids})
+			this.listQueryContent.page = 1;
+			this.getContentList();
 		},
+		
+
+		onSubmit(){
+			if(this.curItem.type == '0'){
+				this.getResList()
+			}else if(this.curItem.type == '1'){
+				this.getContentList()	
+			}
+		},
+
+
+
+		async formSubmit(){
+			this.formLoading = false;
+			this.formData.channelId = this.id;
+			var res = await request.post(config.addChannelCate,this.formData);
+			this.formLoading = true;
+			this.getList();
+		},
+
+
+
+
 		handleSelectionChange(val){
 			if(this.curItem.type == '0'){
 				this.selectItme = val;
@@ -334,7 +359,7 @@ export default {
 	},
   filters: {
     typeFilter(status) {
-      const typeMap = { 0: '图片', 1: '视频', 2: '音频', 3: '文本' }
+      const typeMap = { 0: '图片', 1: '视频', 2: '音频', 3: '组合' }
       return typeMap[status]
     },
 		parseCate(cateIds,cateArr){
