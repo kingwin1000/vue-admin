@@ -15,16 +15,16 @@
         	频道配置
           <el-button-group class="tit-btn">
           	<el-button type="primary" icon="el-icon-document-add" size="mini" @click.native="addChannelCate">添加</el-button>
-          	<el-button type="primary" @click="changeSettIngFn" :icon="changeSettIng ? 'el-icon-open':'el-icon-turn-off'" size="mini">设置</el-button>
+          	<el-button :type="changeSetIng ? 'success':'danger'" @click="changeSetIngFn" :icon="changeSetIng ? 'el-icon-open':'el-icon-turn-off'" size="mini">设置</el-button>
         	</el-button-group>
         </div> 
-        <el-tree  :data="treeList"   draggable  @node-drag-end="handleDragEnd" :props="defaultProps" :highlight-current="true" :expand-on-click-node="false" node-key="id" default-expand-all>	
+        <el-tree :data="treeList" draggable :allow-drop="allowDrop" style="user-select:none" :props="defaultProps" :highlight-current="true" :expand-on-click-node="false" node-key="id" default-expand-all>	
             <div class="tree-path" slot-scope="{ node, data }"  @click="loadDate(data)">
               <span v-show="!data.extend" class="tree-title">{{  data.name }}</span>
               <span v-show="data.extend" class="tree-title">
                 <el-input style="width:100%;"  placeholder="输入英文名称" size="mini" v-model.trim="data.name" auto-complete="off"></el-input>
               </span>
-              <el-button-group class="tit-btn" v-if="changeSettIng">
+              <el-button-group class="tit-btn" v-if="changeSetIng">
               	<el-button v-show="!data.extend" type="primary" size="mini" icon="el-icon-edit" @click.stop="() => changeState(data)"></el-button>
                 <el-button v-show="data.extend" type="warning" size="mini" icon="el-icon-document-checked" @click.stop="() => updateList(data)"></el-button>
                 <el-button v-if="data.parentId == '0'" :disabled="data.extend" type="primary" size="mini" icon="el-icon-document-add" @click.stop="() => appendChild(data)"></el-button>
@@ -36,6 +36,7 @@
       </el-aside>
       <el-main style=" padding:0 15px;">
       <template v-if="curItem.type == 0">
+      	
       	<el-form :inline="true" :model="listQueryRes" class="query-form">
         	 <el-form-item>	
             <el-select v-model="curItem.type" @change="changeCurItem" placeholder="请选择状态">
@@ -54,11 +55,10 @@
            </el-form-item>
         </el-form>
         <el-table  ref="multipleTable" key="1" v-loading="loading" row-key="id" :data="listRes" border  @selection-change="handleSelectionChange">
-        	<el-table-column align="center" width="70" type="selection"  :reserve-selection="true" >
-
-          </el-table-column>
-          <el-table-column align="center" label="id" prop="id" width="200"></el-table-column> 
+        	<el-table-column align="center" width="70" type="selection"  :reserve-selection="true"></el-table-column>
           <el-table-column align="center" label="资源名称" prop="resName" show-overflow-tooltip></el-table-column>
+          
+          <el-table-column align="center" label="排序" prop="id" width="100"></el-table-column>
           <el-table-column align="center" label="类型" prop="resType"  width="100">
             <template slot-scope="scope">
               <template>{{ scope.row.resType | typeFilter }}</template>
@@ -66,6 +66,9 @@
           </el-table-column>
                   
         	<el-table-column align="center" label="大小" prop="resSize" width="100"></el-table-column>
+          <el-table-column align="center" label="排序" prop="orderNo" width="100">
+          
+          </el-table-column>
           <el-table-column align="center" label="上传时间" prop="created"  show-overflow-tooltip>
             <template slot-scope="scope">
               {{ scope.row.created | parseTime('{y}-{m}-{d} {h}:{i}') }}
@@ -159,11 +162,11 @@ export default {
 			formData:{
 				name:'',type:0,orderNo:0,resData:[],contentData:[]
 			},
-			changeSettIng:false,
+			changeSetIng:false,
 			formRules:{},
   		defaultProps: {children: 'children',label: 'title'},
 			curItem:{type:1},
-			listQueryRes:{page:1,pageSize:10},
+			listQueryRes:{page:1,pageSize:20},
 			listRes:[],
 			loading:false,
 			totalRes:0,
@@ -179,7 +182,7 @@ export default {
 		this.selectItme = [];
 		this.getList();
 		//this.getResList();
-		//this.getCategories();
+		this.getCategories();
 		//this.getContentList();
   },
   methods: {
@@ -219,11 +222,21 @@ export default {
 			})			
 			this.totalContent = res.totalNum || 0;		 
 		},		
-		changeSettIngFn(){
-			this.changeSettIng = !this.changeSettIng;
+		changeSetIngFn(isChange){
+			if(isChange === true){
+				this.changeSetIng = true;
+			}else{
+				this.changeSetIng = !this.changeSetIng;
+			}
+			this.listContent = [];
+			this.listRes = [];
+			if(!this.changeSetIng){
+				this.getList();	
+			}
 		},		
 		addChannelCate(){
-			let _data = {id:'',channelId:this.id,name:'',type:0,orderNo:0,parentId:'0',extend:true};
+			this.changeSetIngFn(true);
+			let _data = {channelId:this.id, name:'', type:0, orderNo:0, parentId:'0',extend:true};
 			this.treeList.push(_data);		
 		},		
 		changeState(data){
@@ -267,23 +280,26 @@ export default {
 			}
 		},	
 		loadDate(data){
-			console.log('aaaaaaaa',data);
+			if(this.changeSetIng){ return }
 			this.$refs.multipleTable.clearSelection();
 			this.curItem.type = data.type;
 			this.curItem.channelCateId = data.id;
-			
 			if(this.curItem.type == '0'){
 				this.getResList()
 			}else if(this.curItem.type == '1'){
 				this.getContentList()	
 			}	
 		},		
-		
-		 handleDragEnd(draggingNode, dropNode, dropType, ev) {
-			console.log('tree drag end: ', draggingNode);
-			return;
-			//this.treeList = this.treeList;
-		},	
+		allowDrop(draggingNode, dropNode, type) {
+			console.log(draggingNode.level);
+			if (draggingNode.level === dropNode.level) {
+				if (draggingNode.parent.id === dropNode.parent.id) {
+					return type === "prev" || type === "next";
+				}
+			} else {
+				return false;
+			}
+		},
 		
 		
 		
@@ -349,12 +365,14 @@ export default {
 			//console.log(this.selectItme);
 		},
 		async onAddRes(){
-			//if(this.selectItme.length == 0){return}
 			if(!this.curItem.channelCateId){return}
-			var _ids = this.selectItme.map((item,index) =>{ return item.id});
+			var _ids = this.selectItme.map((item,index) =>{ return item.id}); _ids.reverse();
 			var res = await request.put(config.setChannelCate+'/'+this.curItem.channelCateId,{type:0,resData:_ids})
-			this.listQueryRes.page = 1;
-			this.getResList();
+			if(res.code == '20000'){
+				this.$message.success('资源操作成功！')
+				this.listQueryRes.page = 1;
+				this.getResList();
+			}
 		},
 	},
   filters: {

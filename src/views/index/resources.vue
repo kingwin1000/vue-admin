@@ -21,8 +21,8 @@
     <!-- 表单 -->
     
     <el-table v-loading="loading" :data="list" border  @selection-change="handleSelectionChange">
-      <el-table-column align="center" width="100" type="selection"></el-table-column>    
-      <el-table-column align="center" width="300" label="资源名称" prop="resName" show-overflow-tooltip>
+      <el-table-column align="center" width="100" type="selection"></el-table-column>
+      <el-table-column align="center" label="资源名称" prop="resName" show-overflow-tooltip>
         <template slot-scope="scope">
           <el-input v-if="editNum === scope.$index" size="mini"  v-model="scope.row.resName"></el-input>
           <span v-else>{{scope.row.resName}}</span>
@@ -65,12 +65,12 @@
         </template>        
       </el-table-column>       
         
-			<el-table-column align="center" label="上传时间" prop="created"  width="250" show-overflow-tooltip>
+			<el-table-column align="center" label="上传时间" prop="created"  show-overflow-tooltip>
         <template slot-scope="scope">
           {{ scope.row.created | parseTime('{y}-{m}-{d} {h}:{i}') }}
         </template>        
       </el-table-column>
-      <el-table-column align="center"  label="操作">
+      <el-table-column align="center" width="210"  label="操作">
       	<el-button-group slot-scope="scope">
         	<el-button v-if="scope.row.resType == 3" type="primary" size="mini" @click.native.prevent="watchWare(scope.$index, scope.row)">关联</el-button>	
         	<el-button v-else type="primary" size="mini" @click.native.prevent="watchWare(scope.$index, scope.row)">预览</el-button>
